@@ -841,6 +841,7 @@ body.mob .viewbar #gridOp{flex:1 1 auto;min-width:0}
       <span class="small" id="expInfo"></span>
     </div>
     <img class="expimg" id="expImg" alt="Vista del PNG exportado">
+    <label for="expName" class="fnlabel">Nombre del archivo (opcional)<input id="expName" type="text" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
     <p class="small"><b>Se exporta solo lo visible:</b> las capas ocultas no salen y la opacidad de cada capa se respeta.</p>
     <div class="row end">
       <button class="btn" type="button" data-close>Cerrar</button>
@@ -1129,6 +1130,7 @@ var D={
 'Ninguna imagen seleccionada':['No image selected','画像が選択されていません'],
 'Guardada en la galería':['Saved to gallery','ギャラリーに保存しました'],
 'Confirmar':['Confirm','確定'],
+'Nombre del archivo (opcional)':['File name (optional)','ファイル名（任意）'],
 'Quitar anuncios':['Remove ads','広告を削除'],
 'Quita todos los anuncios de la aplicación.':['Removes all ads from the app.','アプリのすべての広告を削除します。'],
 'Ya quitaste los anuncios de la aplicación.':['You have already removed the ads from the app.','アプリの広告はすでに削除されています。'],
@@ -1717,22 +1719,25 @@ function stamp(x,y){
   }
 }
 function shadeStamp(x,y){
-  /* difuminar: mezcla cada píxel pintado con el promedio de su vecindad 3x3 (solo píxeles visibles, no ensancha la forma) */
-  const L=cur(),w=state.w,h=state.h,n=state.brush,o=Math.floor((n-1)/2),a=state.shadeAmt/100;
+  /* difuminar: mezcla cada píxel con el promedio de su vecindad 3x3, contando también los cuadros vacíos (el borde se suaviza hacia afuera) */
+  const L=cur(),w=state.w,h=state.h,n=state.brush,o=Math.floor((n-1)/2),k=state.shadeAmt/100;
   for(let j=0;j<n;j++)for(let i=0;i<n;i++){
-    const px=x-o+i,py=y-o+j;if(!inb(px,py))continue;const k=py*w+px;
-    if(drag.mask&&!state.sel[k])continue;
-    const q=k*4;if(!comp[q+3])continue;
-    let r=0,g=0,b=0,c=0;
+    const px=x-o+i,py=y-o+j;if(!inb(px,py))continue;const p=py*w+px;
+    if(drag.mask&&!state.sel[p])continue;
+    const q=p*4;let sA=0,sR=0,sG=0,sB=0,c=0;
     for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
       const nx=px+dx,ny=py+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;
-      const m=(ny*w+nx)*4;if(!comp[m+3])continue;r+=comp[m];g+=comp[m+1];b+=comp[m+2];c++;
+      const m=(ny*w+nx)*4,al=comp[m+3];c++;if(!al)continue;
+      sA+=al;sR+=comp[m]*al;sG+=comp[m+1]*al;sB+=comp[m+2]*al;
     }
-    if(!c)continue;
-    L.data[q+3]=255;
-    L.data[q]=Math.round(comp[q]*(1-a)+r/c*a);
-    L.data[q+1]=Math.round(comp[q+1]*(1-a)+g/c*a);
-    L.data[q+2]=Math.round(comp[q+2]*(1-a)+b/c*a);
+    if(!sA)continue;
+    const oA=comp[q+3],nA=oA*(1-k)+(sA/c)*k;
+    if(nA<1){L.data[q]=L.data[q+1]=L.data[q+2]=L.data[q+3]=0;continue;}
+    const pr=comp[q]*oA*(1-k)+(sR/c)*k,pg=comp[q+1]*oA*(1-k)+(sG/c)*k,pb=comp[q+2]*oA*(1-k)+(sB/c)*k;
+    L.data[q]=Math.max(0,Math.min(255,Math.round(pr/nA)));
+    L.data[q+1]=Math.max(0,Math.min(255,Math.round(pg/nA)));
+    L.data[q+2]=Math.max(0,Math.min(255,Math.round(pb/nA)));
+    L.data[q+3]=Math.max(0,Math.min(255,Math.round(nA)));
   }
 }
 function stroke(a,b){
@@ -2371,10 +2376,10 @@ function buildExport(){
   tmpc.width=state.w;tmpc.height=state.h;tctx.putImageData(new ImageData(new Uint8ClampedArray(comp),state.w,state.h),0,0);
   const c=document.createElement('canvas');c.width=state.w*s;c.height=state.h*s;
   const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(tmpc,0,0,c.width,c.height);
-  $('#expImg').src=c.toDataURL('image/png');$('#expInfo').textContent=c.width+' × '+c.height+' px';
+  $('#expName').placeholder='pixel-art-'+state.w+'x'+state.h;$('#expImg').src=c.toDataURL('image/png');$('#expInfo').textContent=c.width+' × '+c.height+' px';
   return c;
 }
-$('#btnExport').onclick=()=>{buildExport();openModal('#mExp');};
+$('#btnExport').onclick=()=>{$('#expName').value='';buildExport();openModal('#mExp');};
 $('#expScale').onchange=buildExport;
 let dl=null;
 if(window.claude&&claude.use)claude.use('downloads').then(d=>{dl=d;}).catch(()=>{});
@@ -2410,8 +2415,20 @@ function dlFallback(b,name){
   }
   shareFile(b,name);
 }
+/* nombre del archivo: el que escribas, o "pixel-art-AxB"; si ya lo usaste antes se agrega (1), (2)... */
+const memNames=[];
+function loadNames(){try{return JSON.parse(localStorage.getItem('tdp1:dlnames')||'[]');}catch(e){return memNames;}}
+function rememberName(f){const a=loadNames();a.push(f);const t=a.slice(-500);memNames.length=0;t.forEach(x=>memNames.push(x));try{localStorage.setItem('tdp1:dlnames',JSON.stringify(t));}catch(e){}}
+function pickName(){
+  let base=($('#expName').value||'').replace(/\.png$/i,'').replace(/[\\/:*?"<>|\u0000-\u001f]/g,'').trim().slice(0,60);
+  if(!base)base='pixel-art-'+state.w+'x'+state.h;
+  const used=new Set(loadNames().map(x=>String(x).toLowerCase()));
+  let name=base,n=0;while(used.has((name+'.png').toLowerCase())){n++;name=base+' ('+n+')';}
+  return name+'.png';
+}
+$('#expName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#expSave').click();}});
 $('#expSave').onclick=()=>{
-  const c=buildExport(),name='pixel-art-'+state.w+'x'+state.h+'.png';
+  const c=buildExport(),name=pickName();rememberName(name);
   c.toBlob(b=>{
     if(!b){toast('No se pudo crear la imagen');return;}
     if(dl){dl.save({filename:name,data:b}).then(()=>toast('Imagen guardada')).catch(e=>{if(!e||e.code!=='declined')dlFallback(b,name);});return;}
@@ -2607,23 +2624,7 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
       const sg=document.createElement('div');sg.className='seg';ids.forEach(id=>sg.append(E(id)));g.append(c,sg);return g;};
     const g1=grp('Elegir',['selAll','selLay','selInv','selNone']),g2=grp('A capa nueva',['selToLayer','selEach','selColor']);
     info.className='selinfo';del.className='btn sm danger';del.textContent='Borrar contenido';
-    const g3=document.createElement('div');g3.className='sgrp';const c3=document.createElement('span');c3.className='cap';c3.textContent='Escalar';
-    const sg3=document.createElement('div');sg3.className='seg';
-    [['half','÷2','Reducir a la mitad'],['down','−1','Reducir 1 píxel de tamaño'],['up','+1','Agrandar 1 píxel de tamaño'],['dbl','×2','Duplicar el tamaño']].forEach(a=>{
-      const b=document.createElement('button');b.type='button';b.className='scbtn';b.textContent=a[1];b.title=a[2]+' (lo seleccionado, centrado y con píxeles nítidos)';b.onclick=()=>scaleSel(a[0]);sg3.append(b);});
-    g3.append(c3,sg3);
-    const g4=document.createElement('div');g4.className='sgrp';const c4=document.createElement('span');c4.className='cap';c4.textContent='Sombra automática';
-    const mkSeg=(items,get,set)=>{const sg=document.createElement('div');sg.className='seg';const bs=[];
-      items.forEach(it=>{const b=document.createElement('button');b.type='button';b.textContent=it[1];b.title=it[2];
-        b.onclick=()=>{set(it[0]);bs.forEach(x=>x.b.setAttribute('aria-pressed',String(x.v===get())));};bs.push({b:b,v:it[0]});sg.append(b);});
-      bs.forEach(x=>x.b.setAttribute('aria-pressed',String(x.v===get())));return sg;};
-    const sgDir=mkSeg([['tl','↖','Luz desde arriba a la izquierda'],['tr','↗','Luz desde arriba a la derecha'],['bl','↙','Luz desde abajo a la izquierda'],['br','↘','Luz desde abajo a la derecha']],()=>autoDir,v=>{autoDir=v;});
-    const sgAmt=mkSeg([[.7,'Suave','Sombras suaves'],[1,'Normal','Sombras normales'],[1.4,'Fuerte','Sombras marcadas']],()=>autoAmt,v=>{autoAmt=v;});
-    const bHi=document.createElement('button');bHi.type='button';bHi.className='btn sm';bHi.textContent='Brillos';bHi.title='Agregar también luces del lado de la luz';bHi.setAttribute('aria-pressed','true');
-    bHi.onclick=()=>{autoHi=!autoHi;bHi.setAttribute('aria-pressed',String(autoHi));};
-    const bGo=document.createElement('button');bGo.type='button';bGo.className='btn sm primary scbtn';bGo.textContent='Sombrear';bGo.title='Analiza lo seleccionado y le pone sombras solo';bGo.onclick=autoShade;
-    g4.append(c4,sgDir,sgAmt,bHi,bGo);
-    sec.textContent='';sec.append(info,g1,g2,g3,g4,del);
+    sec.textContent='';sec.append(info,g1,g2,del);
   })();
   $('#colorPop').append(secs[0]);
 
@@ -2950,5 +2951,7 @@ input[type=range]{outline:none}
 #layPop.opdrag{opacity:0;transition:none}
 #impPrev{touch-action:none;cursor:grab}
 .impbtns{justify-content:flex-start!important}
+.fnlabel{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}
+.sheet input[type=text]{min-height:34px;border:3px solid var(--line);border-radius:0;background:var(--panel2);color:var(--ink);font-family:var(--font-ui);font-size:15px;padding:4px 8px;max-width:100%;box-sizing:border-box;width:100%}
 </style>
 </body></html>
