@@ -700,6 +700,7 @@ body.mob .viewbar #gridOp{flex:1 1 auto;min-width:0}
         <button class="btn sm" id="scFV" type="button" title="Reflejar vertical">↕</button>
         <button class="btn sm" id="scCen" type="button">Centrar</button>
         <button class="btn sm" id="scOrig" type="button" title="Volver al tamaño original">Original</button>
+        <button class="btn sm primary" id="scOk" type="button" title="Confirmar la escala y salir de la herramienta">Confirmar</button>
       </div>
     </div>
 
@@ -751,7 +752,6 @@ body.mob .viewbar #gridOp{flex:1 1 auto;min-width:0}
         <button class="btn sm" id="lyUp" type="button" title="Subir">Subir</button>
         <button class="btn sm" id="lyDown" type="button" title="Bajar">Bajar</button>
         <button class="btn sm" id="lyMerge" type="button" title="Unir con la capa de abajo">Unir</button>
-        <button class="btn sm" id="lyScale" type="button" title="Escalar y mover la capa activa con asas">Escalar</button>
         <button class="btn sm" id="lyDel" type="button">Borrar</button>
       </div>
       <div class="layers" id="layers"></div>
@@ -796,14 +796,17 @@ body.mob .viewbar #gridOp{flex:1 1 auto;min-width:0}
 <div class="modal" id="mImp" hidden>
   <div class="sheet" role="dialog" aria-label="Importar imagen">
     <h2>Importar imagen</h2>
-    <input id="imgFile" type="file" accept="image/*" aria-label="Elegir imagen">
+    <div class="filepick">
+      <button class="btn" id="impPick" type="button">Seleccionar imagen</button>
+      <span class="fname" id="impFn">Ninguna imagen seleccionada</span>
+    </div>
+    <input id="imgFile" type="file" accept="image/*" aria-label="Elegir imagen" hidden>
+    <div id="impPrevWrap" hidden><canvas id="impPrev" class="prev"></canvas></div>
+    <div class="row impbtns">
+      <button class="btn" type="button" data-close>Cancelar</button>
+      <button class="btn primary" id="impGo" type="button" disabled>Importar</button>
+    </div>
     <div id="impOpts" class="stack" hidden>
-      <canvas id="impPrev" class="prev"></canvas>
-      <div class="small" id="impInfo"></div>
-      <div class="seg" role="group" aria-label="Destino">
-        <button type="button" data-impmode="layer" aria-pressed="true">Capa nueva en este lienzo</button>
-        <button type="button" data-impmode="doc" aria-pressed="false">Lienzo nuevo</button>
-      </div>
       <div class="row">
         <label for="impW">Ancho final (px)<input id="impW" type="number" min="1" max="128" value="32"></label>
         <span class="small" id="impRes"></span>
@@ -813,10 +816,6 @@ body.mob .viewbar #gridOp{flex:1 1 auto;min-width:0}
       <div class="oprow"><label for="impC">Colores</label><input id="impC" type="range" min="2" max="64" value="16"><span class="zoomlbl" id="impCl">16</span></div>
       <div class="oprow"><label>Método</label><div class="seg" role="group" aria-label="Método de reducción"><button type="button" data-impmeth="sharp" aria-pressed="true">Nítido (colores exactos)</button><button type="button" data-impmeth="smooth" aria-pressed="false">Suave (fotos)</button></div></div>
       <div class="small">Dibujos sencillos o pixel art: usa Nítido, conserva tus colores tal cual. Fotos: usa Suave. Acerca y arrastra la vista previa para encuadrar.</div>
-    </div>
-    <div class="row end">
-      <button class="btn" type="button" data-close>Cancelar</button>
-      <button class="btn primary" id="impGo" type="button" disabled>Importar</button>
     </div>
   </div>
 </div>
@@ -848,7 +847,6 @@ body.mob .viewbar #gridOp{flex:1 1 auto;min-width:0}
     </div>
     <img class="expimg" id="expImg" alt="Vista del PNG exportado">
     <p class="small"><b>Se exporta solo lo visible:</b> las capas ocultas no salen y la opacidad de cada capa se respeta.</p>
-    <p class="small">Si el botón no descarga, mantén presionada la imagen (o clic derecho) y elige guardar.</p>
     <div class="row end">
       <button class="btn" type="button" data-close>Cerrar</button>
       <button class="btn primary" id="expSave" type="button">⬇ Descargar PNG</button>
@@ -1127,7 +1125,13 @@ var D={
 'Este visor no permite guardar en el dispositivo: tus dibujos se mantienen solo mientras esta página siga abierta.':['This viewer cannot save to the device: your drawings are kept only while this page stays open.','このビューアではデバイスに保存できません。作品はこのページを開いている間だけ保持されます。'],
 'Dibujo eliminado':['Drawing deleted','作品を削除しました'],
 'Dibujo duplicado':['Drawing duplicated','作品を複製しました'],
-'No hay espacio para duplicar':['Not enough space to duplicate','複製する容量がありません']
+'No hay espacio para duplicar':['Not enough space to duplicate','複製する容量がありません'],
+'Seleccionar imagen':['Choose image','画像を選択'],
+'Ninguna imagen seleccionada':['No image selected','画像が選択されていません'],
+'Guardada en la galería':['Saved to gallery','ギャラリーに保存しました'],
+'Confirmar':['Confirm','確定'],
+'Escala confirmada':['Scale confirmed','拡大縮小を確定しました'],
+'Confirmar la escala y salir de la herramienta':['Confirm the scale and leave the tool','拡大縮小を確定してツールを終了']
 };
 
 var EMPTY={
@@ -1433,7 +1437,7 @@ function drawHover(){
     hctx.beginPath();drag.pts.forEach((q,i)=>{const X=(q.x+.5)*z,Y=(q.y+.5)*z;if(i)hctx.lineTo(X,Y);else hctx.moveTo(X,Y);});
     hctx.lineWidth=3;hctx.strokeStyle='rgba(255,255,255,.95)';hctx.stroke();hctx.lineWidth=1;hctx.strokeStyle='#000';hctx.stroke();
   }else if(focus){
-    const n=(['pencil','eraser','clone','shade'].includes(state.tool)||(state.tool==='select'&&state.selMode==='pixel'))?state.brush:1,o=Math.floor((n-1)/2);
+    const n=(['pencil','eraser','clone','shade','picker'].includes(state.tool)||(state.tool==='select'&&state.selMode==='pixel'))?state.brush:1,o=Math.floor((n-1)/2);
     const pts=DRAWTOOLS.includes(state.tool)?mirrorPts(focus.x,focus.y,n):[[focus.x,focus.y]];
     pts.forEach(q=>boxStroke((q[0]-o)*z,(q[1]-o)*z,n*z,n*z,false));
   }
@@ -1669,9 +1673,15 @@ function pt(e){
 }
 function sampleComp(p){const j=(p.y*state.w+p.x)*4;return [comp[j],comp[j+1],comp[j+2],comp[j+3]];}
 function pickAt(p,fromTool){
-  if(!inb(p.x,p.y))return;const c=sampleComp(p);
-  if(!c[3]){toast('Ese píxel es transparente');return;}
-  setColor(rgbHex(c[0],c[1],c[2]));pushRecent(state.color);
+  if(!inb(p.x,p.y))return;
+  /* con un grosor mayor a 1 toma el promedio de los pixeles pintados dentro del area del pincel */
+  const n=Math.max(1,state.brush|0),o=Math.floor((n-1)/2);let r=0,g=0,b=0,k=0;
+  for(let j=0;j<n;j++)for(let i=0;i<n;i++){
+    const x=p.x-o+i,y=p.y-o+j;if(!inb(x,y))continue;
+    const c=sampleComp({x:x,y:y});if(!c[3])continue;r+=c[0];g+=c[1];b+=c[2];k++;
+  }
+  if(!k){toast('Ese píxel es transparente');return;}
+  setColor(rgbHex(Math.round(r/k),Math.round(g/k),Math.round(b/k)));pushRecent(state.color);
   if(fromTool)setTool(state.prevTool||'pencil');
 }
 function setFocus(p){
@@ -1939,7 +1949,7 @@ function tfSet(x,y,w,h,doCommit){
 function tfUI(){
   const g=n=>document.getElementById(n);if(!g('scW'))return;
   const L=cur();g('scLay').textContent='Capa: '+(L?L.name:'—');
-  const on=!!tf;['scW','scH','scX','scY','scHalf','scDbl','scFH','scFV','scCen','scOrig'].forEach(i=>{g(i).disabled=!on;});
+  const on=!!tf;['scW','scH','scX','scY','scHalf','scDbl','scFH','scFV','scCen','scOrig','scOk'].forEach(i=>{g(i).disabled=!on;});
   if(on){g('scW').value=tf.w;g('scH').value=tf.h;g('scX').value=tf.x;g('scY').value=tf.y;}
   else{['scW','scH','scX','scY'].forEach(i=>{g(i).value='';});}
   g('scKeep').setAttribute('aria-pressed',String(tfKeep));
@@ -2014,11 +2024,14 @@ function tfDrag(e){
   g('scFH').onclick=()=>{if(tf){tf.fx=!tf.fx;tfApply();commit();}};
   g('scFV').onclick=()=>{if(tf){tf.fy=!tf.fy;tfApply();commit();}};
   g('scCen').onclick=()=>{if(tf)tfSet((state.w-tf.w)/2,(state.h-tf.h)/2,tf.w,tf.h,true);};
+  g('scOk').onclick=()=>{if(!tf)return;commit();tf=null;setTool(state.prevTool&&state.prevTool!=='scale'?state.prevTool:'pencil');toast('Escala confirmada');};
   g('scOrig').onclick=()=>{if(tf){tf.fx=tf.fy=false;tfSet(tf.x,tf.y,tf.sw,tf.sh,true);}};
 })();
 
 /* eventos del puntero */
 cvh.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('contextmenu',e=>{const t=e.target;if(!(t&&t.closest&&t.closest('input,textarea,img')))e.preventDefault();});
+document.addEventListener('selectstart',e=>{const t=e.target&&(e.target.nodeType===1?e.target:e.target.parentElement);if(!(t&&t.closest&&t.closest('input,textarea')))e.preventDefault();});
 const rawDown=e=>{
   const p=pt(e);setFocus(p);
   if(e.button===2||e.altKey){e.preventDefault();pickAt(p,false);return;}
@@ -2273,15 +2286,16 @@ function loadFile(file){
     impMeth=an.simple?'sharp':'smooth';
     const nc=an.U<=64?Math.max(2,an.U):(an.simple?24:16);$('#impC').value=nc;$('#impCl').textContent=nc;
     impBaseW=Math.min(128,an.native?an.native:(iw<=64?iw:64));
-    impMode=(impBaseW<=state.w&&Math.max(1,Math.round(impBaseW*ih/iw))<=state.h)?'layer':'doc';
-    $('#impInfo').textContent='Original: '+iw+' × '+ih+' px · '+(an.U<=64?an.U+' colores':'muchos colores')+(an.native?' · parece pixel art ampliado ('+an.native+'×'+Math.round(ih*an.native/iw)+')':'')+(an.simple?' · se conservan tus colores':'');
+    impMode='layer';
+    $('#impFn').textContent=file.name||'Imagen';
     syncImp();
-    $('#impOpts').hidden=false;$('#impGo').disabled=false;impDefaults();openModal('#mImp');
+    $('#impOpts').hidden=false;$('#impPrevWrap').hidden=false;$('#impGo').disabled=false;impDefaults();openModal('#mImp');
   };
   im.onerror=()=>{URL.revokeObjectURL(url);toast('No se pudo leer la imagen');};
   im.src=url;
 }
-$('#btnImport').onclick=()=>{$('#imgFile').value='';$('#impOpts').hidden=true;$('#impGo').disabled=true;openModal('#mImp');};
+$('#btnImport').onclick=()=>{$('#imgFile').value='';$('#impOpts').hidden=true;$('#impPrevWrap').hidden=true;$('#impFn').textContent='Ninguna imagen seleccionada';$('#impGo').disabled=true;openModal('#mImp');};
+$('#impPick').onclick=()=>$('#imgFile').click();
 $('#imgFile').onchange=e=>loadFile(e.target.files[0]);
 $('#impW').oninput=impUpdate;
 $$('[data-impmeth]').forEach(b=>b.onclick=()=>{impMeth=b.dataset.impmeth;syncImp();impUpdate();});
@@ -2323,23 +2337,37 @@ $('#btnExport').onclick=()=>{buildExport();openModal('#mExp');};
 $('#expScale').onchange=buildExport;
 let dl=null;
 if(window.claude&&claude.use)claude.use('downloads').then(d=>{dl=d;}).catch(()=>{});
-function dlFallback(b,name){
-  /* app Android (Capacitor): el WebView no descarga archivos, así que se guarda y se abre la hoja de compartir/guardar */
+function blobToDataURL(b){return new Promise((res,rej)=>{const rd=new FileReader();rd.onload=()=>res(String(rd.result));rd.onerror=()=>rej(rd.error);rd.readAsDataURL(b);});}
+/* app Android (Capacitor): intenta guardar DIRECTO en la galería, sin abrir la hoja de compartir */
+function saveToGallery(b,name){
+  const CP=window.Capacitor&&window.Capacitor.Plugins;
+  if(!CP)return Promise.reject(new Error('sin-capacitor'));
+  return blobToDataURL(b).then(url=>{
+    const base64=url.split(',')[1],base=name.replace(/\.png$/i,'');
+    const viaMedia=()=>(CP.Media&&CP.Media.savePhoto)?CP.Media.savePhoto({path:url,fileName:base}):Promise.reject(new Error('sin-media'));
+    const viaFiles=()=>(CP.Filesystem&&CP.Filesystem.writeFile)?CP.Filesystem.writeFile({path:'Pictures/PixelArt/'+name,data:base64,directory:'EXTERNAL_STORAGE',recursive:true}):Promise.reject(new Error('sin-fs'));
+    return viaMedia().catch(viaFiles);
+  });
+}
+function shareFile(b,name){
   const CP=window.Capacitor&&window.Capacitor.Plugins;
   if(CP&&CP.Filesystem){
-    const rd=new FileReader();
-    rd.onload=()=>{
-      const data=String(rd.result).split(',')[1];
-      CP.Filesystem.writeFile({path:name,data:data,directory:'CACHE'})
-        .then(res=>CP.Share&&CP.Share.share?CP.Share.share({title:name,url:res.uri,dialogTitle:'Guardar o compartir'}):null)
-        .then(()=>toast('Imagen guardada'))
-        .catch(e=>{if(!e||!/cancel/i.test(String(e.message||e)))toast('No se pudo guardar la imagen');});
-    };
-    rd.readAsDataURL(b);return;
+    blobToDataURL(b).then(u=>CP.Filesystem.writeFile({path:name,data:u.split(',')[1],directory:'CACHE'}))
+      .then(res=>CP.Share&&CP.Share.share?CP.Share.share({title:name,url:res.uri,dialogTitle:'Guardar o compartir'}):null)
+      .then(()=>toast('Imagen guardada'))
+      .catch(e=>{if(!e||!/cancel/i.test(String(e.message||e)))toast('No se pudo guardar la imagen');});
+    return;
   }
   try{const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();
     setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Descargando '+name);}
   catch(e){toast('No se pudo descargar. Mantén presionada la imagen para guardarla.');}
+}
+function dlFallback(b,name){
+  if(window.Capacitor&&window.Capacitor.Plugins){
+    saveToGallery(b,name).then(()=>toast('Guardada en la galería')).catch(()=>shareFile(b,name));
+    return;
+  }
+  shareFile(b,name);
 }
 $('#expSave').onclick=()=>{
   const c=buildExport(),name='pixel-art-'+state.w+'x'+state.h+'.png';
@@ -2377,6 +2405,16 @@ $('#color').oninput=e=>setColor(e.target.value);$('#color').onchange=()=>pushRec
 $('#hex').onchange=e=>{let v=e.target.value.trim();if(v[0]!=='#')v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v))setColor(v);else e.target.value=state.color;};
 $('#opacity').oninput=e=>{cur().opacity=+e.target.value;$('#opLbl').textContent=e.target.value+'%';renderPixels();};
 $('#opacity').onchange=()=>commit();
+/* mientras arrastras la opacidad, la ventana de Capas se vuelve invisible (el control sigue activo); al soltar vuelve */
+(function(){
+  const op=$('#opacity');let on=false;
+  const set=v=>{const p=$('#layPop');if(p)p.classList.toggle('opdrag',v);};
+  const start=()=>{on=true;set(true);};
+  const end=()=>{if(on){on=false;set(false);}};
+  op.addEventListener('pointerdown',start);op.addEventListener('touchstart',start,{passive:true});op.addEventListener('mousedown',start);
+  ['pointerup','pointercancel','touchend','touchcancel','mouseup','blur'].forEach(t=>window.addEventListener(t,end,true));
+  op.addEventListener('change',end);
+})();
 $('#lyAdd').onclick=layerAdd;$('#lyDup').onclick=layerDup;$('#lyDel').onclick=layerDel;
 $('#lyUp').onclick=()=>layerMove(1);$('#lyDown').onclick=()=>layerMove(-1);$('#lyMerge').onclick=layerMerge;
 $('#selToLayer').onclick=selToLayer;$('#selLay').onclick=selLay;$('#selColor').onclick=selColorLayers;
@@ -2604,7 +2642,6 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
   const wrap=(b,p,cls)=>{const w=document.createElement('div');w.className='pw'+(cls?' '+cls:'');w.append(b);if(p)w.append(p);return w;};
   /* Capas */
   const layPop=mkPop('layPop');layPop.append(secs[1]);
-  $('#lyScale',layPop).onclick=()=>{setTool('scale');closePops();};
   const layBtn=mkBtn('layBtn',ICONS.layers,'Capas',true);layBtn.setAttribute('aria-haspopup','true');layBtn.onclick=()=>pop('#layPop');
   /* Vista (zoom): solo en móvil, en desktop sigue bajo el lienzo */
   /* Grosor: en el lugar de Vista; solo aparece con herramientas que usan pincel */
@@ -2795,4 +2832,18 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
 </script>
 
+<style>
+/* sin selección de texto al mantener presionado (solo en campos de texto) */
+html,body,body *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body input,body textarea,body [contenteditable="true"]{-webkit-user-select:text;user-select:text}
+body img{-webkit-touch-callout:default}
+button,.btn,.seg button,.chip,.sw{-webkit-tap-highlight-color:transparent}
+/* selector de archivo con la estética del juego */
+.filepick{display:flex;align-items:center;gap:10px;min-width:0;border:3px solid var(--line);background:var(--panel2);padding:6px}
+.filepick .btn{flex:none}
+.filepick .fname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-ui);font-size:14px;color:var(--muted)}
+/* ventana de capas invisible mientras se ajusta la opacidad */
+#layPop.opdrag{opacity:0;transition:none}
+.impbtns{justify-content:flex-start!important}
+</style>
 </body></html>
