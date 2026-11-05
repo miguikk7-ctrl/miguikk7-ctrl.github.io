@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.miguikk7_ctrl.twa",
+        "sha256_cert_fingerprints": ["E4:D8:09:FA:8A:0E:5F:1E:6A:D4:A5:A3:B9:4B:17:1D:E4:DE:15:9F:B0:90:BF:F9:ED:AE:F5:A8:C6:BC:1B:9D"]
+      }
+    }]
