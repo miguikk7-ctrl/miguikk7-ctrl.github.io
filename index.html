@@ -653,13 +653,9 @@ body.mob .viewbar #gridOp{flex:1 1 auto;min-width:0}
         <span class="cap">Parecido</span><input type="range" id="eTol" min="0" max="60" value="12" aria-label="Cuánto se parecen los colores a borrar"><span class="zoomlbl" id="eTolL">12%</span>
       </div>
       <div class="grp" data-for="shade">
-        <span class="cap">Sombra</span>
-        <div class="seg">
-          <button type="button" data-shademode="dark">Oscurecer</button>
-          <button type="button" data-shademode="light">Aclarar</button>
-        </div>
-        <input type="range" id="shadeAmt" min="5" max="80" value="25" aria-label="Intensidad por pasada">
-        <span class="zoomlbl" id="shadeLbl">25%</span>
+        <span class="cap">Intensidad</span>
+        <input type="range" id="shadeAmt" min="10" max="100" value="50" aria-label="Intensidad del difuminado">
+        <span class="zoomlbl" id="shadeLbl">50%</span>
       </div>
       <div class="grp" data-for="pencil eraser fill clone shade">
         <span class="cap">Espejo</span>
@@ -812,10 +808,9 @@ body.mob .viewbar #gridOp{flex:1 1 auto;min-width:0}
         <span class="small" id="impRes"></span>
       </div>
       <div class="oprow"><label for="impWr">Tamaño</label><input id="impWr" type="range" min="4" max="128" value="32"></div>
-      <div class="oprow"><label for="impZ">Acercar</label><input id="impZ" type="range" min="100" max="500" value="100"><span class="zoomlbl" id="impZl">×1</span></div>
       <div class="oprow"><label for="impC">Colores</label><input id="impC" type="range" min="2" max="64" value="16"><span class="zoomlbl" id="impCl">16</span></div>
       <div class="oprow"><label>Método</label><div class="seg" role="group" aria-label="Método de reducción"><button type="button" data-impmeth="sharp" aria-pressed="true">Nítido (colores exactos)</button><button type="button" data-impmeth="smooth" aria-pressed="false">Suave (fotos)</button></div></div>
-      <div class="small">Dibujos sencillos o pixel art: usa Nítido, conserva tus colores tal cual. Fotos: usa Suave. Acerca y arrastra la vista previa para encuadrar.</div>
+      <div class="small">Arrastra la vista previa para ubicar la imagen dentro de tu lienzo y usa Tamaño para agrandarla o achicarla. Dibujos sencillos o pixel art: usa Nítido. Fotos: usa Suave.</div>
     </div>
   </div>
 </div>
@@ -863,6 +858,10 @@ body.mob .viewbar #gridOp{flex:1 1 auto;min-width:0}
 .langw .langmenu .btn{width:100%;justify-content:flex-start;gap:6px;padding:6px 12px;min-height:42px;font-size:15px;white-space:nowrap}
 .langw .langmenu .btn::before{content:"";display:inline-block;width:1.1em;text-align:center}
 .langw .langmenu .btn[aria-pressed="true"]::before{content:"✓"}
+.ghead .noads{display:flex;align-items:center;justify-content:flex-start;color:var(--ink);cursor:pointer}
+.adrow{display:flex;justify-content:space-between;align-items:center;gap:12px;border:3px solid var(--line);background:var(--panel2);padding:8px 10px;font-family:var(--font-ui)}
+.adrow b{font-size:18px}
+.ghead .noads svg{width:44px;height:44px;image-rendering:pixelated}
 .ghead .langw{width:100%}
 .ghead .langw .langbtn{width:100%;min-width:0;padding:2px 0}
 .ghead .langw .langcode{display:none}
@@ -1130,6 +1129,23 @@ var D={
 'Ninguna imagen seleccionada':['No image selected','画像が選択されていません'],
 'Guardada en la galería':['Saved to gallery','ギャラリーに保存しました'],
 'Confirmar':['Confirm','確定'],
+'Quitar anuncios':['Remove ads','広告を削除'],
+'Quita todos los anuncios de la aplicación.':['Removes all ads from the app.','アプリのすべての広告を削除します。'],
+'Ya quitaste los anuncios de la aplicación.':['You have already removed the ads from the app.','アプリの広告はすでに削除されています。'],
+'Precio':['Price','価格'],
+'Equivale a':['Equivalent to','換算'],
+'Tipo de cambio de hoy':['Today’s exchange rate','本日の為替レート'],
+'El precio final puede variar según tu tienda o método de pago.':['The final price may vary depending on your store or payment method.','最終価格はストアや支払い方法により異なる場合があります。'],
+'Pagar':['Pay','支払う'],
+'No, gracias':['No, thanks','いいえ'],
+'El pago estará disponible pronto':['Payment will be available soon','お支払いは近日対応予定です'],
+'Sin anuncios':['No ads','広告なし'],
+'Arrastra la vista previa para ubicar la imagen dentro de tu lienzo y usa Tamaño para agrandarla o achicarla. Dibujos sencillos o pixel art: usa Nítido. Fotos: usa Suave.':['Drag the preview to place the image inside your canvas and use Size to enlarge or shrink it. Simple drawings or pixel art: use Sharp. Photos: use Smooth.','プレビューをドラッグして画像をキャンバス内に配置し、サイズで拡大・縮小します。イラストやドット絵はシャープ、写真はスムーズを使います。'],
+'Difuminar (blur)':['Blur','ぼかし'],
+'Difuminar':['Blur','ぼかし'],
+'Intensidad':['Strength','強さ'],
+'Intensidad del difuminado':['Blur strength','ぼかしの強さ'],
+'Arrastra sobre el dibujo para difuminar: mezcla cada píxel con los de alrededor. Cada pasada suaviza más. Con grosor mayor difuminas más zona.':['Drag over the drawing to blur: each pixel is mixed with its neighbors. Every pass softens more. A larger size blurs a bigger area.','絵の上をドラッグしてぼかします。各ピクセルを周囲と混ぜます。何度も通すほど柔らかくなります。サイズを大きくすると広い範囲をぼかせます。'],
 'Escala confirmada':['Scale confirmed','拡大縮小を確定しました'],
 'Confirmar la escala y salir de la herramienta':['Confirm the scale and leave the tool','拡大縮小を確定してツールを終了']
 };
@@ -1172,6 +1188,8 @@ function core(c,el){
     var ax={horizontal:['horizontal','水平'],vertical:['vertical','垂直'],'en ambos ejes':['on both axes','両方向']}[m[1]];
     return P('Mirror '+ax[0]+'. Drag the blue handle to move it.','ミラー（'+ax[1]+'）。青いハンドルをドラッグして移動できます。');}
   if((m=/^Descargando (.*)$/.exec(c)))return P('Downloading '+m[1],m[1]+' をダウンロード中');
+  if((m=/^Lienzo: (.*)$/.exec(c)))return P('Canvas: '+m[1],'キャンバス: '+m[1]);
+  if((m=/^Imagen: (.*)$/.exec(c)))return P('Image: '+m[1],'画像: '+m[1]);
   if((m=/^Resultado: (.*)$/.exec(c)))return P('Result: '+m[1],'結果：'+m[1]);
   if((m=/^Original: (.*)$/.exec(c)))return P('Original: '+m[1],'元のサイズ：'+m[1]);
   if((m=/^(\d+) colores$/.exec(c)))return P(m[1]+' colors',m[1]+'色');
@@ -1313,7 +1331,7 @@ const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const __T=s=>window.__t?window.__t(s):s;
 
 const state={w:16,h:16,layers:[],active:0,sel:new Uint8Array(0),color:'#d6336c',tool:'pencil',prevTool:'pencil',
-  zoom:12,brush:1,grid:true,selMode:'wand',tol:0,selSub:false,nearMode:'paint',mirror:'off',lastMirror:'h',shadeMode:'dark',shadeAmt:25,shadeTone:true,nid:1,recent:[],etol:12,ftol:0,fillAll:false,gridOp:38};
+  zoom:12,brush:1,grid:true,selMode:'wand',tol:0,selSub:false,nearMode:'paint',mirror:'off',lastMirror:'h',shadeMode:'dark',shadeAmt:50,shadeTone:true,nid:1,recent:[],etol:12,ftol:0,fillAll:false,gridOp:38};
 let tf=null, tfKeep=true, focus=null, anchor=null, drag=null, img=null, comp=null, hist=[], hi=-1, pendingEach=0, toastT=0;
 
 const cv=$('#cv'), ctx=cv.getContext('2d');
@@ -1360,7 +1378,7 @@ const HINTS={
   clone:'Pulsa sobre un píxel para tomar su color y arrastra para pintar con él. El color elegido no cambia.',
   select:'Varita: toca una zona. Lazo: dibuja alrededor. Rectángulo, Píxel o Color también. Luego sepáralo en capas desde el panel Selección.',
   move:'Arrastra para mover la selección, o toda la capa si no hay selección. Flechas = 1 píxel.',
-  shade:'Pasa sobre cualquier color visible: pinta ahí un tono más oscuro o más claro (en la capa activa). Cada pasada da un escalón más.'
+  shade:'Arrastra sobre el dibujo para difuminar: mezcla cada píxel con los de alrededor. Cada pasada suaviza más. Con grosor mayor difuminas más zona.'
 };
 function setHint(){$('#msg').textContent=HINTS[state.tool]||'';}
 function toast(m){
@@ -1529,7 +1547,7 @@ const ICONS={
   clone:['XXXXX...','X...X...','X.XXXXX.','XXXXXXX.','..X...X.','..X...X.','..XXXXX.','........'],
   select:['XX.XX.XX','X......X','........','X......X','........','X......X','X......X','XX.XX.XX'],
   move:['...XX...','..XXXX..','X..XX..X','XXXXXXXX','XXXXXXXX','X..XX..X','..XXXX..','...XX...'],
-  shade:['..X.X.XX','.X.X.XXX','X.X.XXXX','.X.XXXXX','X.XXXXXX','.XXXXXXX','XXXXXXXX','XXXXXXXX'],
+  shade:['...XX...','...XX...','..XXXX..','..XXXX..','.XXXXXX.','XXXXXXXX','XXXXXXXX','.XXXXXX.'],
   mirror:['XX.XX.XX','X..XX..X','X..XX..X','XX.XX.XX','XX.XX.XX','X..XX..X','X..XX..X','XX.XX.XX'],
   scale:['XXXX....','XX......','X.X.....','X..X....','....X..X','.....X.X','......XX','....XXXX'],
   eye:['........','..XXXX..','.XX..XX.','XX.XX.XX','XX.XX.XX','.XX..XX.','..XXXX..','........']
@@ -1609,7 +1627,7 @@ const TOOLS=[
   {id:'fill',name:'Cubo de pintura',short:'Cubo de pintura',key:'G'},
   {id:'picker',name:'Gotero',short:'Gotero',key:'I'},
   {id:'clone',name:'Tomar y pintar',short:'Tomar',key:'T'},
-  {id:'shade',name:'Sombreado con degradado',short:'Sombra',key:'D'},
+  {id:'shade',name:'Difuminar (blur)',short:'Difuminar',key:'D'},
   {id:'select',name:'Seleccionar píxeles',short:'Seleccionar',key:'S'},
   {id:'move',name:'Mover píxeles',short:'Mover',key:'M'},
   {id:'scale',name:'Escalar y mover capa',short:'Escalar',key:'R'}
@@ -1699,18 +1717,22 @@ function stamp(x,y){
   }
 }
 function shadeStamp(x,y){
-  const L=cur(),w=state.w,n=state.brush,o=Math.floor((n-1)/2),cx=x-o+(n-1)/2,cy=y-o+(n-1)/2;
-  const dark=state.shadeMode==='dark',tone=false;
-  const tg=dark?(tone?[36,30,84]:[0,0,0]):(tone?[255,236,184]:[255,255,255]);
+  /* difuminar: mezcla cada píxel pintado con el promedio de su vecindad 3x3 (solo píxeles visibles, no ensancha la forma) */
+  const L=cur(),w=state.w,h=state.h,n=state.brush,o=Math.floor((n-1)/2),a=state.shadeAmt/100;
   for(let j=0;j<n;j++)for(let i=0;i<n;i++){
     const px=x-o+i,py=y-o+j;if(!inb(px,py))continue;const k=py*w+px;
     if(drag.mask&&!state.sel[k])continue;
-    const f=1;
-    const a=state.shadeAmt/100*f;if(a<=drag.applied[k]+1e-6)continue;
-    drag.applied[k]=a;const q=k*4,od=drag.orig;if(!od[q+3])continue;
-    L.data[q+3]=255;L.data[q]=Math.round(od[q]*(1-a)+tg[0]*a);
-    L.data[q+1]=Math.round(od[q+1]*(1-a)+tg[1]*a);
-    L.data[q+2]=Math.round(od[q+2]*(1-a)+tg[2]*a);
+    const q=k*4;if(!comp[q+3])continue;
+    let r=0,g=0,b=0,c=0;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+      const nx=px+dx,ny=py+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;
+      const m=(ny*w+nx)*4;if(!comp[m+3])continue;r+=comp[m];g+=comp[m+1];b+=comp[m+2];c++;
+    }
+    if(!c)continue;
+    L.data[q+3]=255;
+    L.data[q]=Math.round(comp[q]*(1-a)+r/c*a);
+    L.data[q+1]=Math.round(comp[q+1]*(1-a)+g/c*a);
+    L.data[q+2]=Math.round(comp[q+2]*(1-a)+b/c*a);
   }
 }
 function stroke(a,b){
@@ -2030,8 +2052,8 @@ function tfDrag(e){
 
 /* eventos del puntero */
 cvh.addEventListener('contextmenu',e=>e.preventDefault());
-document.addEventListener('contextmenu',e=>{const t=e.target;if(!(t&&t.closest&&t.closest('input,textarea,img')))e.preventDefault();});
-document.addEventListener('selectstart',e=>{const t=e.target&&(e.target.nodeType===1?e.target:e.target.parentElement);if(!(t&&t.closest&&t.closest('input,textarea')))e.preventDefault();});
+document.addEventListener('contextmenu',e=>{const t=e.target;if(!(t&&t.closest&&t.closest('input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=button]),textarea,img')))e.preventDefault();});
+document.addEventListener('selectstart',e=>{const t=e.target&&(e.target.nodeType===1?e.target:e.target.parentElement);if(!(t&&t.closest&&t.closest('input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=button]),textarea')))e.preventDefault();});
 const rawDown=e=>{
   const p=pt(e);setFocus(p);
   if(e.button===2||e.altKey){e.preventDefault();pickAt(p,false);return;}
@@ -2045,7 +2067,6 @@ const rawDown=e=>{
   if(t==='pencil'||t==='eraser'||t==='clone'||t==='shade'){
     if(!cur().visible){toast('La capa activa está oculta');drag=null;return;}
     if(t==='clone'){if(!inb(p.x,p.y)){drag=null;return;}drag.rgba=sampleComp(p);}
-    if(t==='shade'){drag.orig=comp.slice();drag.applied=new Float32Array(state.w*state.h);}
     stroke(p,p);renderPixels();
   }else if(t==='erasecolor'){if(eraseColor(p)){renderPixels();commit();}drag=null;
   }else if(t==='fill'){
@@ -2184,7 +2205,7 @@ function buildSamples(){
 
 
 /* importar */
-let impCanvas=null,impName='Imagen',impMode='layer',impZ=1,impPX=.5,impPY=.5;
+let impCanvas=null,impName='Imagen',impMode='layer',impZ=1,impPX=.5,impPY=.5,impOX=0,impOY=0,impLast=null,impCache=null;
 function impSize(){
   const iw=impCanvas.width,ih=impCanvas.height;let tw=Math.max(1,Math.min(128,parseInt($('#impW').value,10)||1));
   let th=Math.max(1,Math.round(tw*ih/iw));if(th>128){th=128;tw=Math.max(1,Math.round(128*iw/ih));}
@@ -2260,16 +2281,40 @@ function syncImp(){
   $$('[data-impmeth]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.impmeth===impMeth)));
   $$('[data-impmode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.impmode===impMode)));
 }
-function impRefresh(){
-  if(!impCanvas)return;const r=impRender(),pv=$('#impPrev');pv.width=r.w;pv.height=r.h;
-  pv.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(r.data),r.w,r.h),0,0);
-  const k=Math.max(1,Math.floor(Math.min(300/r.w,260/r.h)));pv.style.width=r.w*k+'px';pv.style.height=r.h*k+'px';
+/* la imagen se coloca DENTRO del lienzo actual: se arrastra la vista previa para ubicarla y "Tamaño" la agranda o achica */
+function impResampled(){
+  const s=impSize(),key=s.tw+'|'+s.th+'|'+impMeth+'|'+$('#impC').value;
+  if(impCache&&impCache.key===key)return impCache.r;
+  const r=impRender();impCache={key:key,r:r};return r;
 }
-function impUpdate(){const s=impSize();$('#impRes').textContent='Resultado: '+s.tw+' × '+s.th+' px';$('#impWr').value=s.tw;impRefresh();}
+function impPlaced(){
+  const r=impResampled(),W=state.w,H=state.h,out=new Uint8ClampedArray(W*H*4),ox=Math.round(impOX),oy=Math.round(impOY);
+  for(let y=0;y<r.h;y++){
+    const ty=y+oy;if(ty<0||ty>=H)continue;
+    for(let x=0;x<r.w;x++){
+      const tx=x+ox;if(tx<0||tx>=W)continue;
+      const a=(y*r.w+x)*4;if(!r.data[a+3])continue;
+      const b=(ty*W+tx)*4;out[b]=r.data[a];out[b+1]=r.data[a+1];out[b+2]=r.data[a+2];out[b+3]=r.data[a+3];
+    }
+  }
+  return out;
+}
+function impRefresh(){
+  if(!impCanvas)return;const out=impPlaced(),pv=$('#impPrev');pv.width=state.w;pv.height=state.h;
+  pv.getContext('2d').putImageData(new ImageData(out,state.w,state.h),0,0);
+  const k=Math.max(1,Math.floor(Math.min(300/state.w,260/state.h)));pv.style.width=state.w*k+'px';pv.style.height=state.h*k+'px';
+}
+function impUpdate(){
+  const s=impSize();
+  if(impLast){impOX+=(impLast.tw-s.tw)/2;impOY+=(impLast.th-s.th)/2;}
+  else{impOX=(state.w-s.tw)/2;impOY=(state.h-s.th)/2;}
+  impLast=s;
+  $('#impRes').textContent='Lienzo: '+state.w+' × '+state.h+' px · Imagen: '+s.tw+' × '+s.th+' px';$('#impWr').value=s.tw;impRefresh();
+}
 function impDefaults(){
   const iw=impCanvas.width,ih=impCanvas.height;let tw=impBaseW;
-  if(impMode==='layer'&&(tw>state.w||Math.round(tw*ih/iw)>state.h))tw=Math.max(1,Math.floor(Math.min(state.w/iw,state.h/ih)*iw));
-  $('#impW').value=Math.max(1,Math.min(128,tw));impUpdate();
+  if(tw>state.w||Math.round(tw*ih/iw)>state.h)tw=Math.max(1,Math.floor(Math.min(state.w/iw,state.h/ih)*iw));
+  $('#impW').value=Math.max(1,Math.min(128,tw));impLast=null;impUpdate();
 }
 function loadFile(file){
   if(!file||!/^image\//.test(file.type)){toast('Ese archivo no es una imagen');return;}
@@ -2281,7 +2326,7 @@ function loadFile(file){
     const pv=$('#impPrev'),s=Math.min(1,220/impCanvas.width,160/impCanvas.height);
     pv.width=Math.max(1,Math.round(impCanvas.width*s));pv.height=Math.max(1,Math.round(impCanvas.height*s));
     const pc=pv.getContext('2d');pc.imageSmoothingEnabled=false;pc.drawImage(impCanvas,0,0,pv.width,pv.height);
-    impZ=1;impPX=impPY=.5;$('#impZ').value=100;$('#impZl').textContent='×1';impData=impCanvas.getContext('2d').getImageData(0,0,impCanvas.width,impCanvas.height);
+    impZ=1;impPX=impPY=.5;impCache=null;impData=impCanvas.getContext('2d').getImageData(0,0,impCanvas.width,impCanvas.height);
     const an=impAnalyze(),iw=impCanvas.width,ih=impCanvas.height;
     impMeth=an.simple?'sharp':'smooth';
     const nc=an.U<=64?Math.max(2,an.U):(an.simple?24:16);$('#impC').value=nc;$('#impCl').textContent=nc;
@@ -2300,23 +2345,19 @@ $('#imgFile').onchange=e=>loadFile(e.target.files[0]);
 $('#impW').oninput=impUpdate;
 $$('[data-impmeth]').forEach(b=>b.onclick=()=>{impMeth=b.dataset.impmeth;syncImp();impUpdate();});
 $('#impWr').oninput=e=>{$('#impW').value=e.target.value;impUpdate();};
-$('#impZ').oninput=e=>{impZ=e.target.value/100;$('#impZl').textContent='×'+String(impZ.toFixed(1)).replace(/\.0$/,'');impUpdate();};
 $('#impC').oninput=e=>{$('#impCl').textContent=e.target.value;impUpdate();};
 (function(){const ip=$('#impPrev');let d=null;
   ip.addEventListener('pointerdown',e=>{d={x:e.clientX,y:e.clientY};ip.setPointerCapture(e.pointerId);});
-  ip.addEventListener('pointermove',e=>{if(!d||!impCanvas)return;const r=ip.getBoundingClientRect();
-    impPX-=(e.clientX-d.x)/r.width/impZ;impPY-=(e.clientY-d.y)/r.height/impZ;d={x:e.clientX,y:e.clientY};impRefresh();});
+  ip.addEventListener('pointermove',e=>{if(!d||!impCanvas)return;const r=ip.getBoundingClientRect(),k=r.width/state.w;
+    impOX+=(e.clientX-d.x)/k;impOY+=(e.clientY-d.y)/k;d={x:e.clientX,y:e.clientY};impRefresh();});
   const end=()=>{d=null;};ip.addEventListener('pointerup',end);ip.addEventListener('pointercancel',end);})();
 $$('[data-impmode]').forEach(b=>b.onclick=()=>{
   impMode=b.dataset.impmode;$$('[data-impmode]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));if(impCanvas)impDefaults();
 });
 $('#impGo').onclick=()=>{
-  if(!impCanvas)return;const src=impRender(),s={tw:src.w,th:src.h};
-  if(impMode==='doc'){if(window.__proj)window.__proj.name(impName);newDoc(s.tw,s.th,()=>[mkLayer(impName,src.data.slice())]);}
-  else{
-    const L=mkLayer(impName,placeData(src,Math.floor((state.w-s.tw)/2),Math.floor((state.h-s.th)/2)));
-    state.layers.splice(state.active+1,0,L);state.active++;render();commit();
-  }
+  if(!impCanvas)return;
+  const L=mkLayer(impName,impPlaced());
+  state.layers.splice(state.active+1,0,L);state.active++;render();commit();
   closeModals();
 };
 const stage=$('#stage');
@@ -2408,11 +2449,16 @@ $('#opacity').onchange=()=>commit();
 /* mientras arrastras la opacidad, la ventana de Capas se vuelve invisible (el control sigue activo); al soltar vuelve */
 (function(){
   const op=$('#opacity');let on=false;
-  const set=v=>{const p=$('#layPop');if(p)p.classList.toggle('opdrag',v);};
-  const start=()=>{on=true;set(true);};
-  const end=()=>{if(on){on=false;set(false);}};
+  const clr=()=>{try{const g=window.getSelection&&window.getSelection();if(g&&g.removeAllRanges)g.removeAllRanges();}catch(_){}};
+  const hud=document.createElement('div');hud.id='opHud';hud.hidden=true;hud.setAttribute('aria-live','off');document.body.appendChild(hud);
+  const upd=()=>{hud.textContent=(window.__T?__T('Opacidad'):'Opacidad')+' '+op.value+'%';};
+  const set=v=>{const p=$('#layPop');if(p)p.classList.toggle('opdrag',v);hud.hidden=!v;if(v)upd();};
+  const start=()=>{on=true;clr();set(true);};
+  const end=()=>{clr();if(on){on=false;set(false);}};
+  op.addEventListener('input',()=>{if(on)upd();});
   op.addEventListener('pointerdown',start);op.addEventListener('touchstart',start,{passive:true});op.addEventListener('mousedown',start);
-  ['pointerup','pointercancel','touchend','touchcancel','mouseup','blur'].forEach(t=>window.addEventListener(t,end,true));
+  op.addEventListener('contextmenu',e=>e.preventDefault());
+  ['pointerup','pointercancel','touchend','touchcancel','mouseup','blur','visibilitychange'].forEach(t=>window.addEventListener(t,end,true));
   op.addEventListener('change',end);
 })();
 $('#lyAdd').onclick=layerAdd;$('#lyDup').onclick=layerDup;$('#lyDel').onclick=layerDel;
@@ -2745,7 +2791,7 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
 
   /* ---- pantalla ---- */
   const g=el('section');g.id='gallery';g.hidden=true;g.setAttribute('aria-label','Mis dibujos');
-  g.innerHTML='<div class="gwrap"><header class="ghead"><span></span><h1>Mis dibujos</h1><span></span></header>'+
+  g.innerHTML='<div class="gwrap"><header class="ghead"><span class="noads" role="img" aria-label="Sin anuncios" title="Sin anuncios"><svg viewBox="0 0 20 20" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M6 7h1v1h-1zM11 7h2v1h-2zM5 8h1v1h-1zM7 8h1v1h-1zM11 8h1v1h-1zM13 8h1v1h-1zM5 9h3v1h-3zM11 9h1v1h-1zM13 9h1v1h-1zM5 10h1v1h-1zM7 10h1v1h-1zM11 10h1v1h-1zM13 10h1v1h-1zM5 11h1v1h-1zM7 11h1v1h-1zM11 11h2v1h-2z"/><path fill="#e5383b" d="M6 1h8v1h-8zM5 2h10v1h-10zM3 3h4v1h-4zM13 3h4v1h-4zM3 4h3v1h-3zM15 4h2v1h-2zM2 5h5v1h-5zM16 5h2v1h-2zM1 6h3v1h-3zM5 6h3v1h-3zM16 6h3v1h-3zM1 7h2v1h-2zM7 7h2v1h-2zM17 7h2v1h-2zM1 8h2v1h-2zM8 8h2v1h-2zM17 8h2v1h-2zM1 9h2v1h-2zM8 9h3v1h-3zM17 9h2v1h-2zM1 10h2v1h-2zM9 10h2v1h-2zM17 10h2v1h-2zM1 11h2v1h-2zM10 11h1v1h-1zM17 11h2v1h-2zM1 12h2v1h-2zM11 12h3v1h-3zM17 12h2v1h-2zM1 13h3v1h-3zM12 13h3v1h-3zM16 13h3v1h-3zM2 14h2v1h-2zM13 14h5v1h-5zM3 15h2v1h-2zM14 15h3v1h-3zM3 16h4v1h-4zM13 16h4v1h-4zM5 17h10v1h-10zM6 18h8v1h-8z"/></svg></span><h1>Mis dibujos</h1><span></span></header>'+
     '<div class="gnote" id="gNote" hidden></div><div class="ggrid" id="gGrid"></div>'+
     '<div class="gempty" id="gEmpty" hidden>Aún no tienes dibujos.<br>Toca <b>+</b> para crear el primero.</div></div>'+
     '<button class="gfab" id="gFab" type="button" aria-label="Dibujo nuevo"><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M3 1h2v2h2v2h-2v2h-2v-2h-2v-2h2z"/></svg></button>';
@@ -2823,6 +2869,59 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
     const nid=uid();index.unshift({id:nid,name:(r.name+' copia').slice(0,40),w:r.w,h:r.h,updated:Date.now(),thumb:r.thumb});
     const ok=sSet(KEY+'p:'+nid,raw);saveIndex();drawGal();toast(ok?'Dibujo duplicado':'No hay espacio para duplicar');
   }
+
+  /* ---- quitar anuncios (PREPARADO: la compra real se conecta después) ---- */
+  const REG_CUR={MX:'MXN',CO:'COP',AR:'ARS',CL:'CLP',PE:'PEN',VE:'VES',EC:'USD',BO:'BOB',PY:'PYG',UY:'UYU',CR:'CRC',PA:'USD',GT:'GTQ',HN:'HNL',SV:'USD',NI:'NIO',DO:'DOP',CU:'CUP',PR:'USD',US:'USD',ES:'EUR',FR:'EUR',DE:'EUR',IT:'EUR',PT:'EUR',NL:'EUR',BE:'EUR',AT:'EUR',IE:'EUR',FI:'EUR',GR:'EUR',BR:'BRL',CA:'CAD',GB:'GBP',JP:'JPY',CN:'CNY',KR:'KRW',IN:'INR',AU:'AUD',NZ:'NZD',CH:'CHF',SE:'SEK',NO:'NOK',DK:'DKK',PL:'PLN',RU:'RUB',TR:'TRY',ZA:'ZAR',PH:'PHP',ID:'IDR',TH:'THB',VN:'VND',MY:'MYR',SG:'SGD',HK:'HKD',TW:'TWD',AE:'AED',SA:'SAR',IL:'ILS',EG:'EGP',NG:'NGN',UA:'UAH',CZ:'CZK',HU:'HUF',RO:'RON'};
+  const TZ_REG={'America/Mexico_City':'MX','America/Monterrey':'MX','America/Tijuana':'MX','America/Cancun':'MX','America/Bogota':'CO','America/Lima':'PE','America/Santiago':'CL','America/Argentina/Buenos_Aires':'AR','America/Buenos_Aires':'AR','America/Caracas':'VE','America/Guayaquil':'EC','America/La_Paz':'BO','America/Asuncion':'PY','America/Montevideo':'UY','America/Costa_Rica':'CR','America/Panama':'PA','America/Guatemala':'GT','America/Tegucigalpa':'HN','America/El_Salvador':'SV','America/Managua':'NI','America/Santo_Domingo':'DO','America/Havana':'CU','America/Puerto_Rico':'PR','America/Sao_Paulo':'BR','Europe/Madrid':'ES'};
+  function userRegion(){
+    const langs=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'']);
+    for(const l of langs){const m=/^[a-z]{2,3}[-_]([A-Za-z]{2})\b/.exec(l||'');if(m)return m[1].toUpperCase();}
+    try{const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;if(TZ_REG[tz])return TZ_REG[tz];}catch(e){}
+    return null;
+  }
+  function getRate(code){
+    const ck=KEY+'fx';
+    try{const c=JSON.parse(localStorage.getItem(ck)||'null');if(c&&c.code===code&&Date.now()-c.t<6*36e5)return Promise.resolve(c.rate);}catch(e){}
+    const ac=window.AbortController?new AbortController():null,to=setTimeout(()=>{if(ac)ac.abort();},7000);
+    return fetch('https://open.er-api.com/v6/latest/USD',ac?{signal:ac.signal}:undefined).then(r=>r.json()).then(j=>{
+      clearTimeout(to);const rate=j&&j.rates&&j.rates[code];if(!rate)throw new Error('sin-tasa');
+      try{localStorage.setItem(ck,JSON.stringify({code:code,rate:rate,t:Date.now()}));}catch(e){}return rate;
+    }).catch(e=>{clearTimeout(to);throw e;});
+  }
+  const NOADS_PRICE_USD=1;
+  window.NoAds={
+    product:'no_ads',priceUSD:NOADS_PRICE_USD,
+    isPurchased:()=>{try{return localStorage.getItem(KEY+'noads')==='1';}catch(e){return false;}},
+    /* TODO (después): aquí va la compra real (p. ej. Google Play Billing). Al confirmarse: guardar KEY+'noads'='1' y ocultar los anuncios. */
+    buy:()=>{toast('El pago estará disponible pronto');return Promise.resolve(false);}
+  };
+  function adRow(label,valueNode){const r=el('div','adrow'),l=el('span','',label);r.append(l,valueNode);return r;}
+  function openAds(){
+    if(window.NoAds.isPurchased()){
+      sheet('Quitar anuncios',[el('p','small','Ya quitaste los anuncios de la aplicación.')],[{t:'Cerrar',fn:closeModals}]);return;
+    }
+    const intro=el('p','small','Quita todos los anuncios de la aplicación.');
+    const price=el('b','','US$'+NOADS_PRICE_USD.toFixed(2));
+    const rows=[adRow('Precio',price)];
+    const code=REG_CUR[userRegion()||''];
+    if(code&&code!=='USD'){
+      const loc=el('b','','…'),rate=el('span','small','');
+      const r2=adRow('Equivale a',loc);const r3=el('div','small');r3.append(el('span','','Tipo de cambio de hoy'),document.createTextNode(': '));const rv=el('span','','…');r3.append(rv);
+      rows.push(r2,r3);
+      getRate(code).then(rt=>{
+        let f;try{f=new Intl.NumberFormat(navigator.language||'es',{style:'currency',currency:code});}catch(e){f=null;}
+        const v=NOADS_PRICE_USD*rt;loc.textContent='≈ '+(f?f.format(v):v.toFixed(2)+' '+code);
+        rv.textContent='1 USD = '+rt.toLocaleString(navigator.language||'es',{maximumFractionDigits:4})+' '+code;
+      }).catch(()=>{r2.remove();r3.remove();});
+    }
+    const note=el('p','small','El precio final puede variar según tu tienda o método de pago.');
+    sheet('Quitar anuncios',[intro].concat(rows,[note]),[
+      {t:'No, gracias',fn:closeModals},
+      {t:'Pagar',cls:'primary',fn:()=>{window.NoAds.buy();}}
+    ]);
+  }
+  (function(){const na=$('.noads',g);if(!na)return;na.setAttribute('role','button');na.tabIndex=0;na.onclick=openAds;
+    na.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openAds();}};})();
   document.addEventListener('langchange',()=>{if(!g.hidden)drawGal();});
   showGal();
 })();
@@ -2835,15 +2934,21 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventLi
 <style>
 /* sin selección de texto al mantener presionado (solo en campos de texto) */
 html,body,body *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-body input,body textarea,body [contenteditable="true"]{-webkit-user-select:text;user-select:text}
+body input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=button]),body textarea,body [contenteditable="true"]{-webkit-user-select:text;user-select:text}
+input[type=range],input[type=range]::-webkit-slider-thumb{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#opacity{touch-action:none}
 body img{-webkit-touch-callout:default}
-button,.btn,.seg button,.chip,.sw{-webkit-tap-highlight-color:transparent}
+html,body,body *{-webkit-tap-highlight-color:rgba(0,0,0,0)}
+input[type=range]{outline:none}
+#opHud{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);transform:translateX(-50%);z-index:9999;pointer-events:none;padding:8px 16px;background:var(--panel);color:var(--ink);border:3px solid var(--accent);box-shadow:0 3px 0 rgba(0,0,0,.45);font:600 18px var(--font-ui);white-space:nowrap}
+#opHud[hidden]{display:none}
 /* selector de archivo con la estética del juego */
 .filepick{display:flex;align-items:center;gap:10px;min-width:0;border:3px solid var(--line);background:var(--panel2);padding:6px}
 .filepick .btn{flex:none}
 .filepick .fname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-ui);font-size:14px;color:var(--muted)}
 /* ventana de capas invisible mientras se ajusta la opacidad */
 #layPop.opdrag{opacity:0;transition:none}
+#impPrev{touch-action:none;cursor:grab}
 .impbtns{justify-content:flex-start!important}
 </style>
 </body></html>
