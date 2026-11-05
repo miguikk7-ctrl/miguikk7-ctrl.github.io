@@ -1,4 +1,6 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#141a33"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#141a33"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><script>document.documentElement.classList.add('boot');setTimeout(function(){document.documentElement.classList.remove('boot');},3000);</script>
+<style>html.boot body>*:not(#gallery):not(script):not(style):not(link):not(meta):not(title){visibility:hidden!important}</style>
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Taller de Píxeles</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -803,14 +805,10 @@ body.mob .viewbar #gridOp{flex:1 1 auto;min-width:0}
       <button class="btn primary" id="impGo" type="button" disabled>Importar</button>
     </div>
     <div id="impOpts" class="stack" hidden>
-      <div class="row">
-        <label for="impW">Ancho final (px)<input id="impW" type="number" min="1" max="128" value="32"></label>
-        <span class="small" id="impRes"></span>
-      </div>
-      <div class="oprow"><label for="impWr">Tamaño</label><input id="impWr" type="range" min="4" max="128" value="32"></div>
+      <div class="small" id="impRes">Arrastra la vista previa para acomodar la imagen</div>
+      <div class="oprow"><label for="impWr">Tamaño</label><input id="impWr" type="range" min="4" max="256" step="1" value="32"></div>
       <div class="oprow"><label for="impC">Colores</label><input id="impC" type="range" min="2" max="64" value="16"><span class="zoomlbl" id="impCl">16</span></div>
       <div class="oprow"><label>Método</label><div class="seg" role="group" aria-label="Método de reducción"><button type="button" data-impmeth="sharp" aria-pressed="true">Nítido (colores exactos)</button><button type="button" data-impmeth="smooth" aria-pressed="false">Suave (fotos)</button></div></div>
-      <div class="small">Arrastra la vista previa para ubicar la imagen dentro de tu lienzo y usa Tamaño para agrandarla o achicarla. Dibujos sencillos o pixel art: usa Nítido. Fotos: usa Suave.</div>
     </div>
   </div>
 </div>
@@ -1130,6 +1128,7 @@ var D={
 'Ninguna imagen seleccionada':['No image selected','画像が選択されていません'],
 'Guardada en la galería':['Saved to gallery','ギャラリーに保存しました'],
 'Confirmar':['Confirm','確定'],
+'Arrastra la vista previa para acomodar la imagen':['Drag the preview to position the image','プレビューをドラッグして画像を配置'],
 'Nombre del archivo (opcional)':['File name (optional)','ファイル名（任意）'],
 'Quitar anuncios':['Remove ads','広告を削除'],
 'Quita todos los anuncios de la aplicación.':['Removes all ads from the app.','アプリのすべての広告を削除します。'],
@@ -1333,7 +1332,7 @@ const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const __T=s=>window.__t?window.__t(s):s;
 
 const state={w:16,h:16,layers:[],active:0,sel:new Uint8Array(0),color:'#d6336c',tool:'pencil',prevTool:'pencil',
-  zoom:12,brush:1,grid:true,selMode:'wand',tol:0,selSub:false,nearMode:'paint',mirror:'off',lastMirror:'h',shadeMode:'dark',shadeAmt:50,shadeTone:true,nid:1,recent:[],etol:12,ftol:0,fillAll:false,gridOp:38};
+  zoom:12,brush:1,grid:true,selMode:'pixel',tol:0,selSub:false,nearMode:'paint',mirror:'off',lastMirror:'h',shadeMode:'dark',shadeAmt:50,shadeTone:true,nid:1,recent:[],etol:12,ftol:0,fillAll:false,gridOp:38};
 let tf=null, tfKeep=true, focus=null, anchor=null, drag=null, img=null, comp=null, hist=[], hi=-1, pendingEach=0, toastT=0;
 
 const cv=$('#cv'), ctx=cv.getContext('2d');
@@ -2057,8 +2056,6 @@ function tfDrag(e){
 
 /* eventos del puntero */
 cvh.addEventListener('contextmenu',e=>e.preventDefault());
-document.addEventListener('contextmenu',e=>{const t=e.target;if(!(t&&t.closest&&t.closest('input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=button]),textarea,img')))e.preventDefault();});
-document.addEventListener('selectstart',e=>{const t=e.target&&(e.target.nodeType===1?e.target:e.target.parentElement);if(!(t&&t.closest&&t.closest('input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=button]),textarea')))e.preventDefault();});
 const rawDown=e=>{
   const p=pt(e);setFocus(p);
   if(e.button===2||e.altKey){e.preventDefault();pickAt(p,false);return;}
@@ -2211,9 +2208,11 @@ function buildSamples(){
 
 /* importar */
 let impCanvas=null,impName='Imagen',impMode='layer',impZ=1,impPX=.5,impPY=.5,impOX=0,impOY=0,impLast=null,impCache=null;
+/* el control Tamaño llega hasta 4 veces el lienzo (mínimo 128, máximo 512) para poder acercar mucho y encuadrar */
+function impMax(){return Math.max(128,Math.min(512,Math.max(state.w,state.h)*4));}
 function impSize(){
-  const iw=impCanvas.width,ih=impCanvas.height;let tw=Math.max(1,Math.min(128,parseInt($('#impW').value,10)||1));
-  let th=Math.max(1,Math.round(tw*ih/iw));if(th>128){th=128;tw=Math.max(1,Math.round(128*iw/ih));}
+  const iw=impCanvas.width,ih=impCanvas.height,M=impMax();let tw=Math.max(1,Math.min(M,parseInt($('#impWr').value,10)||1));
+  let th=Math.max(1,Math.round(tw*ih/iw));if(th>M){th=M;tw=Math.max(1,Math.round(M*iw/ih));}
   return {tw:tw,th:th};
 }
 let impMeth='sharp',impData=null,impBaseW=32;
@@ -2263,7 +2262,7 @@ function impRender(){
   const x0=impPX*iw-cw/2,y0=impPY*ih-ch/2;let d;
   if(impMeth==='sharp'){
     d=new Uint8ClampedArray(s.tw*s.th*4);
-    const src=impData.data,bw=cw/s.tw,bh=ch/s.th,nx=Math.max(1,Math.min(10,Math.floor(bw))),ny=Math.max(1,Math.min(10,Math.floor(bh)));
+    const src=impData.data,bw=cw/s.tw,bh=ch/s.th,cap=Math.max(1,Math.min(10,Math.floor(Math.sqrt(3e6/(s.tw*s.th))))),nx=Math.max(1,Math.min(cap,Math.floor(bw))),ny=Math.max(1,Math.min(cap,Math.floor(bh)));
     for(let ty=0;ty<s.th;ty++)for(let tx=0;tx<s.tw;tx++){
       const m=new Map();let best=-1,bn=0;
       for(let j=0;j<ny;j++){const sy=Math.floor(y0+ty*bh+(j+.5)*bh/ny);
@@ -2314,12 +2313,12 @@ function impUpdate(){
   if(impLast){impOX+=(impLast.tw-s.tw)/2;impOY+=(impLast.th-s.th)/2;}
   else{impOX=(state.w-s.tw)/2;impOY=(state.h-s.th)/2;}
   impLast=s;
-  $('#impRes').textContent='Lienzo: '+state.w+' × '+state.h+' px · Imagen: '+s.tw+' × '+s.th+' px';$('#impWr').value=s.tw;impRefresh();
+  $('#impWr').value=s.tw;impRefresh();
 }
 function impDefaults(){
   const iw=impCanvas.width,ih=impCanvas.height;let tw=impBaseW;
   if(tw>state.w||Math.round(tw*ih/iw)>state.h)tw=Math.max(1,Math.floor(Math.min(state.w/iw,state.h/ih)*iw));
-  $('#impW').value=Math.max(1,Math.min(128,tw));impLast=null;impUpdate();
+  const wr=$('#impWr'),lim=Math.max(+wr.min+1,Math.min(impMax(),Math.floor(impMax()*iw/ih)));wr.max=lim;wr.value=Math.max(+wr.min,Math.min(lim,tw));impLast=null;impUpdate();
 }
 function loadFile(file){
   if(!file||!/^image\//.test(file.type)){toast('Ese archivo no es una imagen');return;}
@@ -2334,7 +2333,7 @@ function loadFile(file){
     impZ=1;impPX=impPY=.5;impCache=null;impData=impCanvas.getContext('2d').getImageData(0,0,impCanvas.width,impCanvas.height);
     const an=impAnalyze(),iw=impCanvas.width,ih=impCanvas.height;
     impMeth=an.simple?'sharp':'smooth';
-    const nc=an.U<=64?Math.max(2,an.U):(an.simple?24:16);$('#impC').value=nc;$('#impCl').textContent=nc;
+    const nc=+$('#impC').max;$('#impC').value=nc;$('#impCl').textContent=nc;
     impBaseW=Math.min(128,an.native?an.native:(iw<=64?iw:64));
     impMode='layer';
     $('#impFn').textContent=file.name||'Imagen';
@@ -2347,9 +2346,8 @@ function loadFile(file){
 $('#btnImport').onclick=()=>{$('#imgFile').value='';$('#impOpts').hidden=true;$('#impPrevWrap').hidden=true;$('#impFn').textContent='Ninguna imagen seleccionada';$('#impGo').disabled=true;openModal('#mImp');};
 $('#impPick').onclick=()=>$('#imgFile').click();
 $('#imgFile').onchange=e=>loadFile(e.target.files[0]);
-$('#impW').oninput=impUpdate;
 $$('[data-impmeth]').forEach(b=>b.onclick=()=>{impMeth=b.dataset.impmeth;syncImp();impUpdate();});
-$('#impWr').oninput=e=>{$('#impW').value=e.target.value;impUpdate();};
+$('#impWr').oninput=impUpdate;
 $('#impC').oninput=e=>{$('#impCl').textContent=e.target.value;impUpdate();};
 (function(){const ip=$('#impPrev');let d=null;
   ip.addEventListener('pointerdown',e=>{d={x:e.clientX,y:e.clientY};ip.setPointerCapture(e.pointerId);});
@@ -2491,8 +2489,11 @@ const fsRoot=document.documentElement;
 const isFull=()=>document.fullscreenElement||document.webkitFullscreenElement;
 /* pantalla completa por defecto: los navegadores exigen un toque del usuario, así que se activa con el primero (y de nuevo si se sale) */
 let fsFails=0;
-function enterFull(){
-  if(isFull()||fsFails>=3)return;
+/* en la app nativa la pantalla completa la pone Android (barras ocultas); en el navegador no se activa mientras se escribe, porque cerraba el teclado */
+const isTyping=el=>!!el&&((el.tagName==='INPUT'&&!/^(range|checkbox|radio|file|button|color|submit)$/i.test(el.type))||el.tagName==='TEXTAREA'||el.tagName==='SELECT'||el.isContentEditable);
+function enterFull(e){
+  if(window.Capacitor||isFull()||fsFails>=3)return;
+  if(isTyping(document.activeElement)||(e&&isTyping(e.target)))return;
   const req=fsRoot.requestFullscreen||fsRoot.webkitRequestFullscreen;if(!req){fsFails=3;return;}
   try{const p=req.call(fsRoot,{navigationUI:'hide'});if(p&&p.catch)p.catch(()=>{fsFails++;});}catch(e){fsFails++;}
 }
@@ -2925,6 +2926,7 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
     na.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openAds();}};})();
   document.addEventListener('langchange',()=>{if(!g.hidden)drawGal();});
   showGal();
+  requestAnimationFrame(function(){document.documentElement.classList.remove('boot');});
 })();
 })();
 </script>
@@ -2934,10 +2936,12 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventLi
 
 <style>
 /* sin selección de texto al mantener presionado (solo en campos de texto) */
-html,body,body *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body :not(input):not(textarea):not([contenteditable="true"]){-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 body input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=button]),body textarea,body [contenteditable="true"]{-webkit-user-select:text;user-select:text}
 input[type=range],input[type=range]::-webkit-slider-thumb{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #opacity{touch-action:none}
+input[type=text]:focus,input[type=text]:focus-visible,input[type=number]:focus,input[type=number]:focus-visible{outline:none!important;border-color:var(--accent)!important;box-shadow:0 0 0 2px var(--accent)}
 body img{-webkit-touch-callout:default}
 html,body,body *{-webkit-tap-highlight-color:rgba(0,0,0,0)}
 input[type=range]{outline:none}
