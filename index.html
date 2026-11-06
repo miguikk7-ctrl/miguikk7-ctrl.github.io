@@ -2484,7 +2484,8 @@ $('#opacity').onchange=()=>commit();
   const upd=()=>{hud.textContent=(window.__T?__T('Opacidad'):'Opacidad')+' '+op.value+'%';};
   const set=v=>{const p=$('#layPop');if(p)p.classList.toggle('opdrag',v);hud.hidden=!v;if(v)upd();};
   const start=()=>{on=true;clr();set(true);};
-  const end=()=>{clr();if(on){on=false;set(false);}};
+  /* solo limpia la selección mientras se arrastra el control de opacidad; limpiarla en cada toque cerraba el teclado en los campos de texto */
+  const end=()=>{if(on){clr();on=false;set(false);}};
   op.addEventListener('input',()=>{if(on)upd();});
   op.addEventListener('pointerdown',start);op.addEventListener('touchstart',start,{passive:true});op.addEventListener('mousedown',start);
   op.addEventListener('contextmenu',e=>e.preventDefault());
