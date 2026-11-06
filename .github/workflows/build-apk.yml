@@ -82,7 +82,7 @@ jobs:
           p = 'android/app/src/main/res/values/styles.xml'
           s = open(p, encoding='utf8').read()
           a = '<item name="android:background">@null</item>'
-          b = a + '\n        <item name="android:statusBarColor">#141A33</item>\n        <item name="android:navigationBarColor">#141A33</item>'
+          b = a + '\n        <item name="android:statusBarColor">#141A33</item>\n        <item name="android:navigationBarColor">#141A33</item>\n        <item name="android:windowBackground">@color/ic_launcher_background</item>'
           if a in s:
               open(p, 'w', encoding='utf8').write(s.replace(a, b, 1))
           else:
@@ -94,12 +94,25 @@ jobs:
           cat > "$JAVA_FILE" <<EOF
           package $PKG;
 
+          import android.os.Bundle;
+          import android.view.WindowManager;
           import androidx.core.view.WindowCompat;
           import androidx.core.view.WindowInsetsCompat;
           import androidx.core.view.WindowInsetsControllerCompat;
           import com.getcapacitor.BridgeActivity;
 
           public class MainActivity extends BridgeActivity {
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  // que la app llene también la franja de la cámara/notch (si no, queda una línea negra arriba)
+                  if (android.os.Build.VERSION.SDK_INT >= 28) {
+                      WindowManager.LayoutParams lp = getWindow().getAttributes();
+                      lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+                      getWindow().setAttributes(lp);
+                  }
+              }
+
               @Override
               public void onWindowFocusChanged(boolean hasFocus) {
                   super.onWindowFocusChanged(hasFocus);
