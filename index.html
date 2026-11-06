@@ -2497,6 +2497,8 @@ function enterFull(e){
   const req=fsRoot.requestFullscreen||fsRoot.webkitRequestFullscreen;if(!req){fsFails=3;return;}
   try{const p=req.call(fsRoot,{navigationUI:'hide'});if(p&&p.catch)p.catch(()=>{fsFails++;});}catch(e){fsFails++;}
 }
+/* si se toca un campo de texto con la pantalla completa del navegador activa, se sale de ella: en Android el teclado no funciona dentro de ella */
+document.addEventListener('focusin',e=>{if(isTyping(e.target)&&isFull()){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(_){}}});
 function fsSync(){setTimeout(fitZoom,120);}
 document.addEventListener('fullscreenchange',fsSync);document.addEventListener('webkitfullscreenchange',fsSync);
 ['pointerup','click'].forEach(t=>document.addEventListener(t,enterFull,true));
@@ -2681,6 +2683,7 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
       const x=clamp(Math.floor((e.clientX-r.left)/r.width*N),0,N-1),y=clamp(Math.floor((e.clientY-r.top)/r.height*N),0,N-1);
       hsv.s=x/(N-1);hsv.v=1-y/(N-1);apply();});
     bind(hue,e=>{const r=huc.getBoundingClientRect();hsv.h=clamp(Math.floor((e.clientX-r.left)/r.width*HN),0,HN-1)*360/HN;apply();});
+    hexIn.addEventListener('focus',()=>{setTimeout(()=>{try{hexIn.select();}catch(e){}},50);});
     hexIn.addEventListener('input',e=>{let v=e.target.value.trim();if(v[0]!=='#')v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v))setColor(v);});
     window.__colorUI(state.color,false);
   })();
