@@ -2513,8 +2513,13 @@ function enterFull(e){
   try{const p=req.call(fsRoot,{navigationUI:'hide'});if(p&&p.catch)p.catch(()=>{fsFails++;});}catch(e){fsFails++;}
 }
 /* si se toca un campo de texto con la pantalla completa del navegador activa, se sale de ella: en Android el teclado no funciona dentro de ella */
-document.addEventListener('focusin',e=>{if(isTyping(e.target)&&isFull()){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(_){}}});
-function fsSync(){setTimeout(fitZoom,120);}
+let fsRefocus=null;
+document.addEventListener('focusin',e=>{if(isTyping(e.target)&&isFull()){fsRefocus=e.target;try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(_){fsRefocus=null;}}});
+/* al terminar de salir de la pantalla completa se vuelve a enfocar el campo, así el teclado aparece con la pantalla ya estable */
+function fsSync(){
+  setTimeout(fitZoom,120);
+  if(!isFull()&&fsRefocus){const el=fsRefocus;fsRefocus=null;setTimeout(()=>{try{el.blur();el.focus();}catch(_){}},200);}
+}
 document.addEventListener('fullscreenchange',fsSync);document.addEventListener('webkitfullscreenchange',fsSync);
 ['pointerup','click'].forEach(t=>document.addEventListener(t,enterFull,true));
 document.addEventListener('keydown',e=>{
