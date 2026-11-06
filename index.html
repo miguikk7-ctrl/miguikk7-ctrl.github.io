@@ -1663,6 +1663,7 @@ function setTool(id){
   $$('[data-for]').forEach(g=>{g.hidden=!g.dataset.for.split(' ').includes(id);});
   cvh.style.cursor=id==='move'?'move':'crosshair';setHint();renderOverlay();drawHover();
   $('#btnPick').setAttribute('aria-pressed',String(id==='picker'));updateToolCur();
+  if(window.__proj&&window.__proj.tool)window.__proj.tool();   /* cada dibujo recuerda su última herramienta */
   const ob=$('#optPanel');if(ob){const has=$$('.grp[data-for]',ob).some(g=>!g.hidden);ob.hidden=!has||!!window.__optCollapsed;const tg=$('#optTog');if(tg){tg.hidden=!has;if(window.__optRefreshTog)window.__optRefreshTog();}}
 }
 
@@ -2775,7 +2776,8 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
     touch(){if(!cur||loading)return;dirty=true;clearTimeout(timer);timer=setTimeout(save,700);},
     beforeNew(){save();const id=uid();index.unshift({id:id,name:pendingName||'Sin título',w:state.w,h:state.h,updated:Date.now(),thumb:''});
       pendingName='';cur=id;dirty=true;hist.length=0;hi=-1;hideGal();},
-    name(n){pendingName=String(n||'').slice(0,40);}
+    name(n){pendingName=String(n||'').slice(0,40);},
+    tool(){if(!cur||loading)return;sSet(KEY+'tool:'+cur,state.tool==='picker'?(state.prevTool||'pencil'):state.tool);}
   };
   document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
   addEventListener('pagehide',save);
@@ -2791,6 +2793,7 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
       state.active=Math.max(0,Math.min(d.active,state.layers.length-1));state.sel=new Uint8Array(d.w*d.h);focus=null;anchor=null;
       hist.length=0;hi=-1;setupCanvas();fitZoom();render();commit();cur=id;dirty=false;
     }finally{loading=false;}
+    {const tl=sGet(KEY+'tool:'+id);if(tl&&tl!=='scale'&&TOOLS.some(t=>t.id===tl)&&tl!==state.tool)setTool(tl);}
     hideGal();
   }
 
@@ -2867,7 +2870,7 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
   function deleteSheet(id){
     const r=find(id);if(!r)return;const p=el('p','small','Se borrará «'+r.name+'» de este dispositivo. No se puede deshacer.');p.style.margin='0';
     sheet('¿Eliminar dibujo?',[p],[{t:'Cancelar',fn:closeModals},{t:'Eliminar',cls:'primary',fn:()=>{
-      index=index.filter(x=>x.id!==id);sDel(KEY+'p:'+id);saveIndex();if(id===cur){cur=null;dirty=false;clearTimeout(timer);}closeModals();drawGal();toast('Dibujo eliminado');}}]);
+      index=index.filter(x=>x.id!==id);sDel(KEY+'p:'+id);sDel(KEY+'tool:'+id);saveIndex();if(id===cur){cur=null;dirty=false;clearTimeout(timer);}closeModals();drawGal();toast('Dibujo eliminado');}}]);
   }
   function dup(id){
     if(id===cur)save();const r=find(id),raw=sGet(KEY+'p:'+id);if(!r||!raw)return;
