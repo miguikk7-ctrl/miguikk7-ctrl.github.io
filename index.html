@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#141a33"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><script>document.documentElement.classList.add('boot');setTimeout(function(){document.documentElement.classList.remove('boot');},3000);</script>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=overlays-content"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#141a33"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><script>document.documentElement.classList.add('boot');setTimeout(function(){document.documentElement.classList.remove('boot');},3000);</script>
 <style>html.boot body>*:not(#gallery):not(script):not(style):not(link):not(meta):not(title){visibility:hidden!important}</style>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Taller de Píxeles</title>
@@ -2515,7 +2515,7 @@ function enterFull(e){
 }
 /* si se toca un campo de texto con la pantalla completa del navegador activa, se sale de ella: en Android el teclado no funciona dentro de ella */
 let fsRefocus=null;
-document.addEventListener('focusin',e=>{if(isTyping(e.target)&&isFull()){fsRefocus=e.target;try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(_){fsRefocus=null;}}});
+document.addEventListener('focusin',e=>{if(window.__txtEdOn)return;if(isTyping(e.target)&&isFull()){fsRefocus=e.target;try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(_){fsRefocus=null;}}});
 /* al terminar de salir de la pantalla completa se vuelve a enfocar el campo, así el teclado aparece con la pantalla ya estable */
 function fsSync(){
   setTimeout(fitZoom,120);
@@ -2546,6 +2546,7 @@ document.addEventListener('keydown',e=>{
 });
 let lastW=innerWidth,lastH=innerHeight;
 window.addEventListener('resize',()=>{clearTimeout(window.__rz);window.__rz=setTimeout(()=>{
+  if(window.__txtOpen||performance.now()<(window.__txtUntil||0)){lastW=innerWidth;lastH=innerHeight;return;}   /* el teclado no debe reencajar el lienzo */
   if(innerWidth!==lastW||Math.abs(innerHeight-lastH)>150)refit();   /* la barra del navegador no debe mover ni reiniciar el lienzo */
   lastW=innerWidth;lastH=innerHeight;},150);});
 
@@ -2704,7 +2705,7 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
       const x=clamp(Math.floor((e.clientX-r.left)/r.width*N),0,N-1),y=clamp(Math.floor((e.clientY-r.top)/r.height*N),0,N-1);
       hsv.s=x/(N-1);hsv.v=1-y/(N-1);apply();});
     bind(hue,e=>{const r=huc.getBoundingClientRect();hsv.h=clamp(Math.floor((e.clientX-r.left)/r.width*HN),0,HN-1)*360/HN;apply();});
-    hexIn.addEventListener('focus',()=>{setTimeout(()=>{try{hexIn.select();}catch(e){}},50);});
+    hexIn.addEventListener('focus',()=>{if(window.__txtEdOn)return;setTimeout(()=>{try{hexIn.select();}catch(e){}},50);});
     hexIn.addEventListener('input',e=>{let v=e.target.value.trim();if(v[0]!=='#')v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v))setColor(v);});
     window.__colorUI(state.color,false);
   })();
@@ -2954,6 +2955,71 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
   showGal();
   requestAnimationFrame(function(){document.documentElement.classList.remove('boot');});
 })();
+})();
+</script>
+<style>
+/* editor de texto grande: en pantallas táctiles, al tocar un campo de texto se escribe aquí, arriba, lejos del teclado */
+#txtEd{position:fixed;inset:0;z-index:2147483000;display:none;align-items:flex-start;justify-content:center;background:rgba(7,10,26,.97);padding:calc(env(safe-area-inset-top,0px) + 18px) 14px 14px;box-sizing:border-box}
+#txtEd.on{display:flex}
+#txtEd .box{width:min(520px,100%);background:var(--panel);color:var(--ink);border:3px solid var(--line);box-shadow:5px 5px 0 rgba(0,0,0,.45);padding:16px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box}
+#txtEd h3{margin:0;font:700 18px var(--font-display);color:var(--ink)}
+#txtEd input{width:100%;min-height:58px;box-sizing:border-box;font:600 24px var(--font-ui);padding:8px 12px;color:var(--ink);background:var(--panel2);border:3px solid var(--accent);border-radius:0;outline:none;-webkit-user-select:text;user-select:text;text-transform:none}
+#txtEd .row{display:flex;gap:10px}
+#txtEd .btn{flex:1;min-height:50px;font-size:16px}
+</style>
+<script>
+(function(){
+  if(!(matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0))return;
+  window.__txtEdOn=true;
+  const T=s=>{try{return window.__t?window.__t(s):s;}catch(e){return s;}};
+  const typing=el=>!!el&&el.nodeType===1&&el.tagName==='INPUT'&&!/^(range|checkbox|radio|file|button|color|submit|hidden|image|reset)$/i.test(el.type);
+  const ov=document.createElement('div');ov.id='txtEd';
+  ov.innerHTML='<div class="box" role="dialog" aria-modal="true"><h3></h3><input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"><div class="row"><button type="button" class="btn" data-x="c"></button><button type="button" class="btn primary" data-x="ok"></button></div></div>';
+  document.body.append(ov);
+  const h3=ov.querySelector('h3'),inp=ov.querySelector('input'),bc=ov.querySelector('[data-x=c]'),bo=ov.querySelector('[data-x=ok]');
+  let cur=null;
+  const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
+  function label(el){
+    let t='';const l=el.closest('label')||(el.id&&document.querySelector('label[for="'+el.id+'"]'));
+    if(l){const c=l.cloneNode(true);c.querySelectorAll('input,select,textarea,button').forEach(x=>x.remove());t=c.textContent.trim();}
+    return t||el.getAttribute('aria-label')||el.getAttribute('placeholder')||'';
+  }
+  function open(el){
+    cur=el;window.__txtOpen=true;
+    h3.textContent=T(label(el));h3.hidden=!h3.textContent;
+    bc.textContent=T('Cancelar');bo.textContent=T('Confirmar');
+    inp.type=el.type==='number'?'number':'text';
+    ['min','max','step','inputmode','placeholder','maxlength'].forEach(a=>{if(el.hasAttribute(a))inp.setAttribute(a,el.getAttribute(a));else inp.removeAttribute(a);});
+    inp.value=el.value;ov.classList.add('on');
+    const fx=()=>{try{inp.focus();inp.select();}catch(e){}};
+    fx();
+    if(fsEl()){   /* el teclado no funciona dentro de la pantalla completa del navegador: se sale y se vuelve a enfocar */
+      const back=()=>{if(!fsEl()){document.removeEventListener('fullscreenchange',back);document.removeEventListener('webkitfullscreenchange',back);setTimeout(()=>{if(cur){inp.blur();fx();}},200);}};
+      document.addEventListener('fullscreenchange',back);document.addEventListener('webkitfullscreenchange',back);
+      try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(e){}
+    }
+  }
+  function done(ok,enter){
+    if(!cur)return;const el=cur;cur=null;window.__txtOpen=false;window.__txtUntil=performance.now()+800;
+    ov.classList.remove('on');try{inp.blur();}catch(e){}
+    if(ok){
+      el.value=inp.value;
+      el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));
+      if(enter)el.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));
+    }
+  }
+  document.addEventListener('focusin',e=>{
+    const el=e.target;if(ov.contains(el)||!typing(el))return;
+    try{el.blur();}catch(x){}
+    if(!cur)open(el);
+  },true);
+  bc.onclick=()=>done(false);bo.onclick=()=>done(true,false);
+  inp.addEventListener('keydown',e=>{
+    e.stopPropagation();
+    if(e.key==='Enter'){e.preventDefault();done(true,true);}
+    else if(e.key==='Escape'){e.preventDefault();done(false);}
+  });
+  ov.addEventListener('pointerdown',e=>e.stopPropagation());
 })();
 </script>
 <script>
