@@ -1408,7 +1408,7 @@ function composite(){comp.fill(0);for(const L of state.layers){if(L.visible)over
 function renderPixels(){composite();ctx.putImageData(img,0,0);updateCoord();}
 function render(){renderPixels();renderOverlay();drawHover();updateSelInfo();}
 
-function renderOverlay(){placeHandles();overlayBody();}
+function renderOverlay(){flushZoom();placeHandles();overlayBody();}
 function overlayBody(){
   const z=state.zoom,w=state.w,h=state.h;sctx.clearRect(0,0,cvs.width,cvs.height);
   if(state.grid&&z>=6&&state.gridOp>0){
@@ -1448,6 +1448,7 @@ function rectOf(a,b){
           x1:Math.min(state.w-1,Math.max(a.x,b.x)),y1:Math.min(state.h-1,Math.max(a.y,b.y))};
 }
 function drawHover(){
+  flushZoom();
   hctx.clearRect(0,0,cvh.width,cvh.height);const z=state.zoom;
   if(state.tool==='scale'){tfDraw();return;}
   if(drag&&drag.t==='select'&&state.selMode==='rect'&&drag.last){
@@ -1467,20 +1468,33 @@ function setupCanvas(){
   state.mx=state.w;state.my=state.h;cv.width=state.w;cv.height=state.h;img=new ImageData(state.w,state.h);comp=img.data;
   $('#zoom').max=maxZoom();
 }
-function applyZoom(){
+/* Zoom fluido: mientras se hace zoom solo cambia el tamaño visible (barato). Las capas de encima (cuadrícula, selección, cursor)
+   son enormes, así que se rehacen una sola vez cuando el zoom se detiene, o antes si se necesitan. */
+let zPend=0;
+function applyZoomCss(){
   const z=state.zoom,W=state.w*z,H=state.h*z;
   cv.style.width=W+'px';cv.style.height=H+'px';
-  cvs.width=cvh.width=Math.round(W);cvs.height=cvh.height=Math.round(H);
   cvs.style.width=cvh.style.width=W+'px';cvs.style.height=cvh.style.height=H+'px';
   const zs=$('#zoom');zs.min=state.minZ;zs.max=maxZoom();zs.step='any';
   $('#zoomLbl').textContent='×'+(Math.round(z*10)/10);zs.value=z;
+}
+function applyZoomHeavy(){
+  clearTimeout(zPend);zPend=0;
+  const z=state.zoom,W=state.w*z,H=state.h*z;
+  cvs.width=cvh.width=Math.round(W);cvs.height=cvh.height=Math.round(H);
   renderOverlay();drawHover();
+}
+function flushZoom(){if(zPend)applyZoomHeavy();}
+function applyZoom(defer){
+  applyZoomCss();
+  if(defer===true){placeHandles();clearTimeout(zPend);zPend=setTimeout(applyZoomHeavy,140);}
+  else applyZoomHeavy();
 }
 function setZoom(z,cx,cy){
   const st=$('#stage'),bd=$('#board'),sr=st.getBoundingClientRect(),r=bd.getBoundingClientRect();
   if(cx==null){cx=sr.left+sr.width/2;cy=sr.top+sr.height/2;}
   const z0=state.zoom,u=(cx-r.left)/z0,v=(cy-r.top)/z0;
-  state.zoom=Math.max(state.minZ,Math.min(maxZoom(),Math.round(z*100)/100));applyZoom();
+  state.zoom=Math.max(state.minZ,Math.min(maxZoom(),Math.round(z*100)/100));applyZoom(true);
   const r2=bd.getBoundingClientRect();st.scrollLeft+=r2.left+u*state.zoom-cx;st.scrollTop+=r2.top+v*state.zoom-cy;
 }
 function calcFit(){
