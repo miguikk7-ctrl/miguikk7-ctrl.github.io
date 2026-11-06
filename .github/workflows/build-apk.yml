@@ -125,8 +125,11 @@ jobs:
           }
           EOF
           MANIFEST=android/app/src/main/AndroidManifest.xml
-          if ! grep -q windowSoftInputMode "$MANIFEST"; then
-            sed -i 's|<activity |<activity android:windowSoftInputMode="adjustResize" |' "$MANIFEST"
+          # el teclado se dibuja encima sin encoger la app (los textos se escriben en un editor arriba, lejos del teclado)
+          if grep -q windowSoftInputMode "$MANIFEST"; then
+            sed -i 's|android:windowSoftInputMode="[^"]*"|android:windowSoftInputMode="adjustNothing"|' "$MANIFEST"
+          else
+            sed -i 's|<activity |<activity android:windowSoftInputMode="adjustNothing" |' "$MANIFEST"
           fi
           npx cap sync android
 
