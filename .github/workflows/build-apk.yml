@@ -131,6 +131,12 @@ jobs:
           else
             sed -i 's|<activity |<activity android:windowSoftInputMode="adjustNothing" |' "$MANIFEST"
           fi
+          # solo vertical
+          if grep -q screenOrientation "$MANIFEST"; then
+            sed -i 's|android:screenOrientation="[^"]*"|android:screenOrientation="portrait"|' "$MANIFEST"
+          else
+            sed -i 's|<activity |<activity android:screenOrientation="portrait" |' "$MANIFEST"
+          fi
           npx cap sync android
 
       - name: Compilar el APK
