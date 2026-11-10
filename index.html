@@ -1660,7 +1660,7 @@ function buildTools(){
     b.onclick=()=>{setTool(t.id);closePops();};menu.append(b);
   });
   const pk=$('#btnPick');pk.className='qbtn';pk.innerHTML=svg(ICONS.picker)+'<span>Gotero</span>';
-  pk.onclick=()=>{closePops();setTool('picker');};
+  pk.onclick=()=>{closePops();setTool(state.tool==='picker'?(state.prevTool||'pencil'):'picker');};   /* tocar el Gotero otra vez lo suelta */
   const cb=document.createElement('button');cb.type='button';cb.id='colorBtn';cb.className='qbtn';
   cb.innerHTML='<span class="chip" id="chip"></span><span>Color</span><span class="car">▾</span>';cb.onclick=()=>pop('#colorPop');
   const cp=document.createElement('div');cp.id='colorPop';cp.className='pop';cp.hidden=true;
@@ -2472,7 +2472,6 @@ $('#selSub').onclick=()=>{state.selSub=!state.selSub;updateButtons();};
 $$('[data-shademode]').forEach(b=>b.onclick=()=>{state.shadeMode=b.dataset.shademode;updateButtons();});
 $('#shadeAmt').oninput=e=>{state.shadeAmt=+e.target.value;$('#shadeLbl').textContent=e.target.value+'%';};
 $$('[data-mirror]').forEach(b=>b.onclick=()=>setMirror(b.dataset.mirror));
-$('#btnPick').onclick=()=>setTool('picker');
 $('#color').oninput=e=>setColor(e.target.value);$('#color').onchange=()=>pushRecent(state.color);
 $('#hex').onchange=e=>{let v=e.target.value.trim();if(v[0]!=='#')v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v))setColor(v);else e.target.value=state.color;};
 $('#opacity').oninput=e=>{cur().opacity=+e.target.value;$('#opLbl').textContent=e.target.value+'%';renderPixels();};
@@ -2980,7 +2979,8 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
   #optDock{order:4;position:relative;flex:none;margin-inline:max(12px,env(safe-area-inset-left,0px)) max(12px,env(safe-area-inset-right,0px))}
   .tools{order:5;margin-bottom:max(8px,env(safe-area-inset-bottom,0px))}
   #statusbar{order:6}
-  #optDock:not(:has(#optTog:not([hidden]))){display:none}
+  #optDock{min-height:48px}   /* el espacio se queda aunque no haya opciones: el lienzo no se mueve */
+  #optDock:not(:has(#optTog:not([hidden]))){visibility:hidden}
   #optDock #optTog{position:static;top:auto;left:auto;right:auto;display:flex;width:100%;height:48px;padding:0 14px;justify-content:flex-start;background:var(--panel);box-shadow:var(--bevel),4px 4px 0 rgba(0,0,0,.28)}
   #optDock #optTog[hidden]{display:none}
   #optDock #optTog .ot-ic{display:flex;color:var(--accent)}
