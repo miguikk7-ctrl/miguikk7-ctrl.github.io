@@ -621,6 +621,7 @@ body.mob .viewbar #gridOp{flex:1 1 auto;min-width:0}
 @media (max-width:859px){.top .actions{grid-template-columns:auto auto auto 1fr 1fr;gap:4px}.top .actions .btn{padding-left:6px;padding-right:6px;min-width:0;font-size:13px}.top .actions #btnProj{padding-left:9px;padding-right:9px}}
 </style>
 <div class="app">
+  <div id="adSlot" aria-hidden="true"></div>
   <header class="top">
     <h1 class="brand">Taller de Píxeles</h1>
     <div class="actions">
@@ -2665,11 +2666,10 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
     const mk=(t,c)=>{const e=document.createElement(t);if(c)e.className=c;return e;};
     const sv=mk('div','svbox'),svc=mk('canvas'),svm=mk('div','svmark');svc.width=N;svc.height=N;svc.setAttribute('aria-label','Tono y brillo');sv.append(svc,svm);
     const hue=mk('div','huebox'),huc=mk('canvas'),hum=mk('div','huemark');huc.width=HN;huc.height=1;huc.setAttribute('aria-label','Tono');hue.append(huc,hum);
-    const side=mk('div','cside'),prev=mk('div','cprev'),sys=mk('button','btn sm');
-    sys.type='button';sys.textContent='Sistema';sys.title='Abrir el selector de color del dispositivo';
-    colorIn.className='cnative';colorIn.tabIndex=-1;colorIn.setAttribute('aria-hidden','true');sys.onclick=()=>colorIn.click();
+    const side=mk('div','cside'),prev=mk('div','cprev');
+    colorIn.className='cnative';colorIn.tabIndex=-1;colorIn.setAttribute('aria-hidden','true');
     hexIn.setAttribute('aria-label','Código del color');
-    side.append(prev,hexIn,sys,colorIn);
+    side.append(prev,hexIn,colorIn);
     const top=mk('div','cpick'),left=mk('div','cleft');left.append(sv,hue);top.append(left,side);
     function drawSV(){
       const c=svc.getContext('2d'),id=c.createImageData(N,N);
@@ -2752,9 +2752,10 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
   optTog.onclick=()=>{window.__optCollapsed=!window.__optCollapsed;setTool(state.tool);};
   side.remove();
   const mq=matchMedia('(max-width:859px)');
+  const dock=document.createElement('div');dock.id='optDock';
   function layout(){
-    if(mq.matches){document.body.classList.add('mob');}
-    else{work.insertBefore(view,stat);document.body.classList.remove('mob');closePops();}
+    if(mq.matches){document.body.classList.add('mob');tools.before(dock);dock.append(optPanel,optTog);}   /* en el móvil las opciones van abajo y se abren hacia arriba */
+    else{work.insertBefore(view,stat);document.body.classList.remove('mob');closePops();sg.append(optPanel,optTog);dock.remove();}
     setTimeout(fitZoom,60);
   }
   mq.addEventListener('change',layout);layout();setTool(state.tool);
@@ -2966,6 +2967,34 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
 #txtEd input{width:100%;min-height:58px;box-sizing:border-box;font:600 24px var(--font-ui);padding:8px 12px;color:var(--ink);background:var(--panel2);border:3px solid var(--accent);border-radius:0;outline:none;-webkit-user-select:text;user-select:text;text-transform:none}
 #txtEd .row{display:flex;gap:10px}
 #txtEd .btn{flex:1;min-height:50px;font-size:16px}
+</style>
+<style>
+/* v14 móvil: arriba solo acciones + cuadrícula (y el anuncio); herramientas y opciones abajo, desplegándose hacia arriba */
+@media (max-width:859px){
+  .app{display:flex;flex-direction:column}
+  .work{display:contents}
+  #adSlot{order:0;flex:none;height:var(--ad-h,0px)}
+  .top{order:1}
+  .viewbar{order:2;margin-top:0!important;margin-bottom:0!important;padding:6px 12px!important}
+  .stagewrap{order:3}
+  #optDock{order:4;position:relative;flex:none;margin-inline:max(12px,env(safe-area-inset-left,0px)) max(12px,env(safe-area-inset-right,0px))}
+  .tools{order:5;margin-bottom:max(8px,env(safe-area-inset-bottom,0px))}
+  #statusbar{order:6}
+  #optDock:not(:has(#optTog:not([hidden]))){display:none}
+  #optDock #optTog{position:static;top:auto;left:auto;right:auto;display:flex;width:100%;height:48px;padding:0 14px;justify-content:flex-start;background:var(--panel);box-shadow:var(--bevel),4px 4px 0 rgba(0,0,0,.28)}
+  #optDock #optTog[hidden]{display:none}
+  #optDock #optTog .ot-ic{display:flex;color:var(--accent)}
+  #optDock #optTog .ot-ic svg{width:26px;height:26px}
+  #optDock #optTog .ot-lb{display:block;flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #optDock #optTog .ot-ch{display:flex;margin-left:auto;transform:scaleY(-1)}
+  #optDock #optPanel{position:absolute;top:auto;left:0;right:0;bottom:calc(100% + 8px);z-index:35;padding:8px 10px;max-height:calc(100svh - 230px)}
+  .tools .pop,.tools .pop.menu{top:auto!important;bottom:100%;margin:0 0 8px!important}
+  #tools #toolMenu{left:0!important;right:0!important;width:auto!important;max-width:none!important}
+  #colorPop,#layPop{max-height:calc(100svh - 230px)}
+}
+/* muestras de paleta y recientes con el mismo relieve que el color elegido */
+.sw{border:3px solid var(--line);box-shadow:inset 3px 3px 0 rgba(255,255,255,.4),inset -3px -3px 0 rgba(0,0,0,.25)}
+#palUsed .sw{width:32px;height:32px}
 </style>
 <script>
 (function(){
