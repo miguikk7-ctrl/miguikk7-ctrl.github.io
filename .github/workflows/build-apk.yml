@@ -96,6 +96,7 @@ jobs:
 
           import android.os.Bundle;
           import android.view.WindowManager;
+          import android.webkit.JavascriptInterface;
           import androidx.core.view.WindowCompat;
           import androidx.core.view.WindowInsetsCompat;
           import androidx.core.view.WindowInsetsControllerCompat;
@@ -110,6 +111,42 @@ jobs:
                       WindowManager.LayoutParams lp = getWindow().getAttributes();
                       lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
                       getWindow().setAttributes(lp);
+                  }
+                  // guardar PNG directo en la Galería (Pictures/Taller de Pixeles), sin menú de compartir
+                  getBridge().getWebView().addJavascriptInterface(new TdpBridge(this), "TdpNative");
+              }
+
+              public static class TdpBridge {
+                  private final android.content.Context ctx;
+                  TdpBridge(android.content.Context c) { ctx = c; }
+
+                  @JavascriptInterface
+                  public boolean savePng(String name, String b64) {
+                      try {
+                          byte[] data = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
+                          android.content.ContentResolver cr = ctx.getContentResolver();
+                          android.content.ContentValues v = new android.content.ContentValues();
+                          v.put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, name);
+                          v.put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/png");
+                          if (android.os.Build.VERSION.SDK_INT >= 29) {
+                              v.put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Taller de Pixeles");
+                              v.put(android.provider.MediaStore.Images.Media.IS_PENDING, 1);
+                          }
+                          android.net.Uri uri = cr.insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v);
+                          if (uri == null) return false;
+                          java.io.OutputStream os = cr.openOutputStream(uri);
+                          if (os == null) return false;
+                          os.write(data);
+                          os.close();
+                          if (android.os.Build.VERSION.SDK_INT >= 29) {
+                              v.clear();
+                              v.put(android.provider.MediaStore.Images.Media.IS_PENDING, 0);
+                              cr.update(uri, v, null, null);
+                          }
+                          return true;
+                      } catch (Exception e) {
+                          return false;
+                      }
                   }
               }
 
