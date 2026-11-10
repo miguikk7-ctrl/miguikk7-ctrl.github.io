@@ -996,6 +996,7 @@ var D={
 'Ocultar capa':['Hide layer','レイヤーを非表示'],
 'Mostrar capa':['Show layer','レイヤーを表示'],
 'Nombre de la capa':['Layer name','レイヤー名'],
+'Cambiar nombre':['Rename','名前を変更'],
 /* selección */
 'Selección':['Selection','選択'],
 'Sin selección':['No selection','選択なし'],
@@ -1587,11 +1588,13 @@ function renderLayers(){
     eye.title=L.visible?'Ocultar capa':'Mostrar capa';eye.innerHTML=svg(ICONS.eye);
     eye.onclick=ev=>{ev.stopPropagation();L.visible=!L.visible;render();commit();};
     const th=document.createElement('canvas');drawThumb(th,L);
-    const nm=document.createElement('input');nm.className='nm';nm.type='text';nm.value=L.name;nm.setAttribute('aria-label','Nombre de la capa');
+    const nm=document.createElement('input');nm.className='nm';nm.type='text';nm.value=L.name;nm.setAttribute('aria-label','Nombre de la capa');nm.readOnly=true;
     nm.onfocus=()=>{if(state.active!==i)setActive(i);};
     nm.onchange=()=>{L.name=nm.value||__T('Capa '+L.id);commit();};
     nm.onkeydown=ev=>{if(ev.key==='Enter')nm.blur();ev.stopPropagation();};
-    row.append(eye,th,nm);row.onclick=()=>{if(state.active!==i)setActive(i);};
+    const rn=document.createElement('button');rn.type='button';rn.className='lren';rn.title='Cambiar nombre';rn.setAttribute('aria-label','Cambiar nombre');rn.innerHTML=svg(ICONS.pencil);
+    rn.onclick=ev=>{ev.stopPropagation();nm.readOnly=false;nm.addEventListener('blur',()=>{nm.readOnly=true;},{once:true});nm.focus();try{nm.select();}catch(e){}};
+    row.append(eye,th,nm);if(i===state.active)row.append(rn);row.onclick=()=>{if(state.active!==i)setActive(i);};
     box.append(row);
   }
 }
@@ -1688,7 +1691,11 @@ function updateToolCur(){
   c.innerHTML=svg(ICONS[d.id])+'<span>'+d.short+'</span><span class="car">▾</span>';
 }
 function closePops(){['#toolMenu','#colorPop','#layPop','#brushPop','#mirPop','#optPop'].forEach(q=>{const e=$(q);if(e)e.hidden=true;});}
-function pop(q){const e=$(q),open=e.hidden;closePops();e.hidden=!open;}
+function pop(q){
+  const e=$(q),open=e.hidden;closePops();e.hidden=!open;
+  /* al abrir Color, Capas o el menú de herramientas, se cierran las opciones de la herramienta */
+  if(open&&!window.__optCollapsed){window.__optCollapsed=true;const ob=$('#optPanel');if(ob)ob.hidden=true;if(window.__optRefreshTog)window.__optRefreshTog();}
+}
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('#tools'))closePops();});
 function eraseColor(p){
   if(!inb(p.x,p.y))return false;
@@ -2400,6 +2407,10 @@ if(window.claude&&claude.use)claude.use('downloads').then(d=>{dl=d;}).catch(()=>
 function blobToDataURL(b){return new Promise((res,rej)=>{const rd=new FileReader();rd.onload=()=>res(String(rd.result));rd.onerror=()=>rej(rd.error);rd.readAsDataURL(b);});}
 /* app Android (Capacitor): intenta guardar DIRECTO en la galería, sin abrir la hoja de compartir */
 function saveToGallery(b,name){
+  /* app instalada: el propio Android guarda la imagen en Galería → Pictures/Taller de Pixeles */
+  if(window.TdpNative&&window.TdpNative.savePng){
+    return blobToDataURL(b).then(url=>{if(window.TdpNative.savePng(name,url.split(',')[1]))return true;throw new Error('sin-nativo');});
+  }
   const CP=window.Capacitor&&window.Capacitor.Plugins;
   if(!CP)return Promise.reject(new Error('sin-capacitor'));
   return blobToDataURL(b).then(url=>{
@@ -2748,7 +2759,7 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
     optTog.setAttribute('aria-label',c?'Mostrar opciones':'Ocultar opciones');optTog.setAttribute('aria-expanded',String(!c));
   };
   window.__optCollapsed=true;
-  optTog.onclick=()=>{window.__optCollapsed=!window.__optCollapsed;setTool(state.tool);};
+  optTog.onclick=()=>{window.__optCollapsed=!window.__optCollapsed;if(!window.__optCollapsed)closePops();setTool(state.tool);};
   side.remove();
   const mq=matchMedia('(max-width:859px)');
   const dock=document.createElement('div');dock.id='optDock';
@@ -2995,13 +3006,19 @@ buildTools();buildSamples();setColor('#d6336c');setTool('pencil');
 /* muestras de paleta y recientes con el mismo relieve que el color elegido */
 .sw{border:3px solid var(--line);box-shadow:inset 3px 3px 0 rgba(255,255,255,.4),inset -3px -3px 0 rgba(0,0,0,.25)}
 #palUsed .sw{width:32px;height:32px}
+/* capas: el nombre solo se edita con el botón del lápiz */
+.lyr:has(.lren){grid-template-columns:34px 40px minmax(0,1fr) auto}
+.lyr .nm[readonly]{pointer-events:none}
+.lyr .lren{width:38px;height:38px;padding:7px;border:3px solid var(--line);border-radius:0;background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:inset 2px 2px 0 rgba(255,255,255,.25),inset -2px -2px 0 rgba(0,0,0,.25)}
+.lyr .lren svg{width:100%;height:100%;display:block}
+.lyr .lren:active{background:var(--accent);color:#fff}
 </style>
 <script>
 (function(){
   if(!(matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0))return;
   window.__txtEdOn=true;
   const T=s=>{try{return window.__t?window.__t(s):s;}catch(e){return s;}};
-  const typing=el=>!!el&&el.nodeType===1&&el.tagName==='INPUT'&&!/^(range|checkbox|radio|file|button|color|submit|hidden|image|reset)$/i.test(el.type);
+  const typing=el=>!!el&&el.nodeType===1&&el.tagName==='INPUT'&&!el.readOnly&&!/^(range|checkbox|radio|file|button|color|submit|hidden|image|reset)$/i.test(el.type);
   const ov=document.createElement('div');ov.id='txtEd';
   ov.innerHTML='<div class="box" role="dialog" aria-modal="true"><h3></h3><input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"><div class="row"><button type="button" class="btn" data-x="c"></button><button type="button" class="btn primary" data-x="ok"></button></div></div>';
   document.body.append(ov);
